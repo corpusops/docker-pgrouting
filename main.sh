@@ -266,42 +266,27 @@ find_top_node() { (set +e && find_top_node_ && set -e;); }
 NODE_TOP="$(echo $(find_top_node))"
 MAILU_VERSiON=1.6
 BATCHED_IMAGES="\
-corpusops/pgrouting-bare/11\
- corpusops/pgrouting-bare/10\
- corpusops/pgrouting-bare/9\
- corpusops/pgrouting-bare/11-2.5\
- corpusops/pgrouting-bare/10-2.4\
- corpusops/pgrouting-bare/10-2.5\
- corpusops/pgrouting-bare/9.4-2.4\
- corpusops/pgrouting-bare/9.4-2.5\
- corpusops/pgrouting-bare/9.4\
- corpusops/pgrouting-bare/9.5-2.4\
- corpusops/pgrouting-bare/9.5-2.5\
- corpusops/pgrouting-bare/9.5\
- corpusops/pgrouting-bare/9.6-2.4\
- corpusops/pgrouting-bare/9.6-2.5\
- corpusops/pgrouting-bare/9.6::30
 corpusops/pgrouting-bare/11-2.5-2.6\
  corpusops/pgrouting-bare/10-2.5-2.6\
  corpusops/pgrouting-bare/10-2.4-2.6\
  corpusops/pgrouting-bare/11-2.5-2.5\
  corpusops/pgrouting-bare/11-2.5-2.4\
  corpusops/pgrouting-bare/10-2.5-2.5\
- corpusops/pgrouting-bare/10-2.5-2.4\
- corpusops/pgrouting-bare/10-2.4-2.5\
+ corpusops/pgrouting-bare/10-2.5-2.4::30
+corpusops/pgrouting-bare/10-2.4-2.5\
  corpusops/pgrouting-bare/10-2.4-2.4\
  corpusops/pgrouting-bare/9.6-2.5-2.6\
  corpusops/pgrouting-bare/9.6-2.4-2.6\
  corpusops/pgrouting-bare/9.5-2.5-2.6\
- corpusops/pgrouting-bare/9.5-2.4-2.6\
- corpusops/pgrouting-bare/9.4-2.5-2.6\
  corpusops/pgrouting-bare/9.4-2.4-2.6::30
 corpusops/pgrouting-bare/9.6-2.5-2.5\
+ corpusops/pgrouting-bare/9.5-2.4-2.6\
+ corpusops/pgrouting-bare/9.4-2.5-2.6\
  corpusops/pgrouting-bare/9.6-2.5-2.4\
  corpusops/pgrouting-bare/9.6-2.4-2.5\
  corpusops/pgrouting-bare/9.6-2.4-2.4\
- corpusops/pgrouting-bare/9.5-2.5-2.5\
- corpusops/pgrouting-bare/9.5-2.5-2.4\
+ corpusops/pgrouting-bare/9.5-2.5-2.5::30
+corpusops/pgrouting-bare/9.5-2.5-2.4\
  corpusops/pgrouting-bare/9.5-2.4-2.5\
  corpusops/pgrouting-bare/9.5-2.4-2.4\
  corpusops/pgrouting-bare/9.4-2.5-2.5\
@@ -357,7 +342,7 @@ packagesUrlStretch='http://apt.postgresql.org/pub/repos/apt/dists/stretch-pgdg/m
 packagesStretch="$(echo "$packagesUrlStretch" | sed -r 's/[^a-zA-Z.-]+/-/g')"
 PGROUTING_REPO="${PGROUTING_REPO:-"https://salsa.debian.org/debian-gis-team/pgrouting.git"}"
 
-
+declare -A duplicated_tags
 declare -A registry_tokens
 declare -A registry_services
 
@@ -671,31 +656,6 @@ do_refresh_pgrouting() {
             -e 's!%%PGROUTING_DEBIAN_VERSION%%!'$pgrouting_debian_version'!g' \
             "$img/Dockerfile"
     done
-    # for suffix in "" "-alpine";do
-    # rsync -azv --delete "corpusops/pgrouting-bare/11-2.5-2.6-alpine/" "corpusops/pgrouting-bare/alpine/"
-    rsync -azv --delete "corpusops/pgrouting-bare/11-2.5-2.6/"        "corpusops/pgrouting-bare/latest/"
-    for suffix in "";do
-        rsync -azv --delete "corpusops/pgrouting-bare/11-2.5-2.6$suffix/" "corpusops/pgrouting-bare/11-2.5$suffix/"
-        rsync -azv --delete "corpusops/pgrouting-bare/10-2.5-2.6$suffix/" "corpusops/pgrouting-bare/10-2.5$suffix/"
-        rsync -azv --delete "corpusops/pgrouting-bare/10-2.4-2.6$suffix/" "corpusops/pgrouting-bare/10-2.4$suffix/"
-        rsync -azv --delete "corpusops/pgrouting-bare/11-2.5-2.6$suffix/" "corpusops/pgrouting-bare/11$suffix/"
-        rsync -azv --delete "corpusops/pgrouting-bare/10-2.5-2.6$suffix/" "corpusops/pgrouting-bare/10$suffix/"
-        pgrouting9ver="2.5"
-        for i in 9.4 9.5 9.6;do
-            for j in 2.4 2.5;do
-                rsync -azv --delete \
-                    "corpusops/pgrouting-bare/${i}-${j}-${pgrouting9ver}$suffix/" \
-                    "corpusops/pgrouting-bare/${i}-${j}$suffix/"
-            done
-            rsync -azv --delete \
-                "corpusops/pgrouting-bare/${i}-2.5-${pgrouting9ver}$suffix/" \
-                "corpusops/pgrouting-bare/${i}$suffix/"
-
-        done
-		rsync -azv --delete \
-			"corpusops/pgrouting-bare/9.6$suffix/" \
-			"corpusops/pgrouting-bare/9$suffix/"
-    done
 }
 
 #  refresh_images $args: refresh images files
@@ -742,6 +702,42 @@ get_docker_squash_args() {
     echo $DOCKER_DO_SQUASH
 }
 
+set_global_tag() {
+    val=${duplicated_tags[$1]}
+    if [[ -n $val ]];then
+        val="$val $2"
+    else
+        val="$2"
+    fi
+    duplicated_tags[$1]=$val
+}
+
+set_global_tags() {
+    set_global_tag "corpusops/pgrouting-bare:11-2.5-2.6" "corpusops/pgrouting-bare"
+    for suffix in "";do
+        set_global_tag "corpusops/pgrouting-bare:11-2.5-2.6$suffix" "corpusops/pgrouting-bare:11-2.5$suffix"
+        set_global_tag "corpusops/pgrouting-bare:10-2.5-2.6$suffix" "corpusops/pgrouting-bare:10-2.5$suffix"
+        set_global_tag "corpusops/pgrouting-bare:10-2.4-2.6$suffix" "corpusops/pgrouting-bare:10-2.4$suffix"
+        set_global_tag "corpusops/pgrouting-bare:11-2.5-2.6$suffix" "corpusops/pgrouting-bare:11$suffix"
+        set_global_tag "corpusops/pgrouting-bare:10-2.5-2.6$suffix" "corpusops/pgrouting-bare:10$suffix"
+        pgrouting9ver="2.5"
+        for i in 9.4 9.5 9.6;do
+            for j in 2.4 2.5;do
+                set_global_tag \
+                    "corpusops/pgrouting-bare:${i}-${j}-${pgrouting9ver}$suffix" \
+                    "corpusops/pgrouting-bare:${i}-${j}$suffix"
+            done
+            set_global_tag \
+                "corpusops/pgrouting-bare:${i}-2.5-${pgrouting9ver}$suffix" \
+                "corpusops/pgrouting-bare:${i}$suffix"
+
+        done
+		set_global_tag \
+			"corpusops/pgrouting-bare/9.6$suffix" \
+			"corpusops/pgrouting-bare/9$suffix"
+    done
+}
+
 record_build_image() {
     # library/ubuntu/latest / mdillon/postgis/latest
     local image=$1
@@ -764,8 +760,16 @@ record_build_image() {
     local cmd="$cmd      echo \"${RED}$image/$df build: Failing after $retries retries${NORMAL}\" >&2"
     local cmd="$cmd      && false;fi"
     local run="echo -e \"${RED}$dbuild${NORMAL}\" && $cmd"
+    # for suffix in "" "-alpine";do
+    # rsync -azv --delete "corpusops/pgrouting-bare/11-2.5-2.6-alpine/" "corpusops/pgrouting-bare/alpine/"
+
     if [[ -n "$DO_RELEASE" ]];then
-        run="$run && ./local/corpusops.bootstrap/hacking/docker_release $itag"
+        release_tags="$itag"
+        for alt_tag in ${duplicated_tags[$itag]};do
+            release_tags="$release_tags $alt_tag"
+            run="$run && docker tag $itag $alt_tag"
+        done
+        run="$run && ./local/corpusops.bootstrap/hacking/docker_release $release_tags"
     fi
     book="$(printf "$run\n${book}" )"
 }
@@ -998,6 +1002,7 @@ do_usage() {
 }
 
 do_main() {
+    set_global_tags
     local args=${@:-usage}
     local actions="refresh_corpusops|refresh_images|build|gen_travis|gen|list_images|clean_tags|get_namespace_tag|refresh_ancestors|refresh_pgrouting"
     actions="@($actions)"
