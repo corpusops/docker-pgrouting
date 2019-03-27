@@ -1,6 +1,9 @@
 FROM corpusops/postgis-bare:9.6-2.4 as builder
+ARG NONINTERACTIVE=y
 ADD helpers/ /tmp/copshelpers/
-RUN cd /tmp/copshelpers && ./up.sh
+RUN cd /tmp/copshelpers && ./up.sh \
+    && apt-get clean -y \
+    && rm -rf /var/lib/apt/lists/*
 MAINTAINER kiorky <kiorky@cryptelium.net>
 RUN bash -euxc ': \
     && apt-get update -qq \

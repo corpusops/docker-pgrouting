@@ -266,6 +266,21 @@ find_top_node() { (set +e && find_top_node_ && set -e;); }
 NODE_TOP="$(echo $(find_top_node))"
 MAILU_VERSiON=1.6
 BATCHED_IMAGES="\
+corpusops/pgrouting-bare/11\
+ corpusops/pgrouting-bare/10\
+ corpusops/pgrouting-bare/9\
+ corpusops/pgrouting-bare/11-2.5\
+ corpusops/pgrouting-bare/10-2.4\
+ corpusops/pgrouting-bare/10-2.5\
+ corpusops/pgrouting-bare/9.4-2.4\
+ corpusops/pgrouting-bare/9.4-2.5\
+ corpusops/pgrouting-bare/9.4\
+ corpusops/pgrouting-bare/9.5-2.4\
+ corpusops/pgrouting-bare/9.5-2.5\
+ corpusops/pgrouting-bare/9.5\
+ corpusops/pgrouting-bare/9.6-2.4\
+ corpusops/pgrouting-bare/9.6-2.5\
+ corpusops/pgrouting-bare/9.6::30
 corpusops/pgrouting-bare/11-2.5-2.6\
  corpusops/pgrouting-bare/10-2.5-2.6\
  corpusops/pgrouting-bare/10-2.4-2.6\
@@ -655,6 +670,29 @@ do_refresh_pgrouting() {
             -e 's!%%PGROUTING_VERSION%%!'$pgrouting_version'!g' \
             -e 's!%%PGROUTING_DEBIAN_VERSION%%!'$pgrouting_debian_version'!g' \
             "$img/Dockerfile"
+    done
+    # for suffix in "" "-alpine";do
+    for suffix in "";do
+        rsync -azv --delete "corpusops/pgrouting-bare/11-2.5-2.6$suffix/" "corpusops/pgrouting-bare/11-2.5$suffix/"
+        rsync -azv --delete "corpusops/pgrouting-bare/10-2.5-2.6$suffix/" "corpusops/pgrouting-bare/10-2.5$suffix/"
+        rsync -azv --delete "corpusops/pgrouting-bare/10-2.4-2.6$suffix/" "corpusops/pgrouting-bare/10-2.4$suffix/"
+        rsync -azv --delete "corpusops/pgrouting-bare/11-2.5-2.6$suffix/" "corpusops/pgrouting-bare/11$suffix/"
+        rsync -azv --delete "corpusops/pgrouting-bare/10-2.5-2.6$suffix/" "corpusops/pgrouting-bare/10$suffix/"
+        pgrouting9ver="2.5"
+        for i in 9.4 9.5 9.6;do
+            for j in 2.4 2.5;do
+                rsync -azv --delete \
+                    "corpusops/pgrouting-bare/${i}-${j}-${pgrouting9ver}$suffix/" \
+                    "corpusops/pgrouting-bare/${i}-${j}$suffix/"
+            done
+            rsync -azv --delete \
+                "corpusops/pgrouting-bare/${i}-2.5-${pgrouting9ver}$suffix/" \
+                "corpusops/pgrouting-bare/${i}$suffix/"
+
+        done
+		rsync -azv --delete \
+			"corpusops/pgrouting-bare/9.6$suffix/" \
+			"corpusops/pgrouting-bare/9$suffix/"
     done
 }
 
