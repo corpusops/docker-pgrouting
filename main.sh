@@ -266,52 +266,6 @@ find_top_node() { (set +e && find_top_node_ && set -e;); }
 NODE_TOP="$(echo $(find_top_node))"
 MAILU_VERSiON=1.6
 BATCHED_IMAGES="\
-corpusops/postgis-bare/latest\
- corpusops/postgis-bare/11\
- corpusops/postgis-bare/10\
- corpusops/postgis-bare/9\
- corpusops/postgis-bare/9.0\
- corpusops/postgis-bare/9.1\
- corpusops/postgis-bare/9.2\
- corpusops/postgis-bare/9.3\
- corpusops/postgis-bare/9.0-2.1\
- corpusops/postgis-bare/9.1-2.1\
- corpusops/postgis-bare/9.1-2.2\
- corpusops/postgis-bare/9.2-2.2\
- corpusops/postgis-bare/9.2-2.3\
- corpusops/postgis-bare/9.3-2.3\
- corpusops/postgis-bare/9.3-2.4\
- corpusops/postgis-bare/9.4-2.3\
- corpusops/postgis-bare/9.4-2.4\
- corpusops/postgis-bare/9.4-2.5\
- corpusops/postgis-bare/9.5-2.4\
- corpusops/postgis-bare/9.5-2.5\
- corpusops/postgis-bare/9.6-2.4\
- corpusops/postgis-bare/9.6-2.5\
- corpusops/postgis-bare/10-2.4\
- corpusops/postgis-bare/10-2.5\
- corpusops/postgis-bare/11-2.5::30
-corpusops/postgis-bare/alpine\
- corpusops/postgis-bare/11-alpine\
- corpusops/postgis-bare/10-alpine\
- corpusops/postgis-bare/9-alpine\
- corpusops/postgis-bare/9.2-alpine\
- corpusops/postgis-bare/9.3-alpine\
- corpusops/postgis-bare/9.4-alpine\
- corpusops/postgis-bare/9.2-2.3-alpine\
- corpusops/postgis-bare/9.3-2.3-alpine\
- corpusops/postgis-bare/9.3-2.4-alpine\
- corpusops/postgis-bare/9.4-2.4-alpine\
- corpusops/postgis-bare/9.4-2.5-alpine\
- corpusops/postgis-bare/9.5-alpine\
- corpusops/postgis-bare/9.5-2.4-alpine\
- corpusops/postgis-bare/9.5-2.5-alpine\
- corpusops/postgis-bare/9.6-alpine\
- corpusops/postgis-bare/9.6-2.4-alpine\
- corpusops/postgis-bare/9.6-2.5-alpine\
- corpusops/postgis-bare/10-2.4-alpine\
- corpusops/postgis-bare/10-2.5-alpine\
- corpusops/postgis-bare/11-2.5-alpine::30
 corpusops/pgrouting-bare/11-2.5-2.6\
  corpusops/pgrouting-bare/10-2.5-2.6\
  corpusops/pgrouting-bare/10-2.4-2.6\
@@ -660,82 +614,11 @@ do_clean_tags() {
 
 do_refresh_ancestors() {
     if [[ -n $SKIP_REFRESH_ANCETORS ]];then return;fi
-    POSTGIS_URL="https://github.com/appropriate/docker-postgis.git"
-    if [ ! -e docker-postgis ];then git clone $POSTGIS_URL docker-postgis;fi
-    ( cd docker-postgis && git fetch --all && git reset --hard origin/master; )
     PGROUTING_URL="https://github.com/Starefossen/docker-pgrouting"
     if [ ! -e docker-pgrouting ];then git clone $PGROUTING_URL docker-pgrouting;fi
     ( cd docker-pgrouting && git fetch --all && git reset --hard origin/master; )
-    cp -vf docker-postgis/*postgis*.sh .
     chmod +x *sh
     chmod -x initdb-*.sh
-}
-
-do_refresh_postgis() {
-    curl -sSL "${packagesUrlJessie}.bz2"  | bunzip2 > "$packagesJessie"
-    curl -sSL "${packagesUrlStretch}.bz2" | bunzip2 > "$packagesStretch"
-    for version in $POSTGIS_MINOR_TAGS;do
-        if (echo $version|egrep -q "(9.0|9.1|9.2)-(2.0|2.1|2.2)");then
-            packages="$packagesJessie"
-            debian_release=jessie
-        else
-            packages="$packagesStretch"
-            debian_release=stretch
-        fi
-        IFS=- read pg_major postgis_major <<< "$version"
-        img="corpusops/postgis-bare/$version"
-        imgalpine="corpusops/postgis-bare/$version-alpine"
-        fullVersion="$(grep -m1 -A10 "^Package: postgresql-$pg_major-postgis-$postgis_major\$" "$packages" | grep -m1 '^Version: ' | cut -d' ' -f2)"
-        [ -z "$fullVersion" ] && { echo >&2 "Unable to find package for PostGIS $postgis_major on Postgres $pg_major"; exit 1; }
-        for j in $img $imgalpine;do if [ ! -e "$j" ];then mkdir -p "$j";fi;done
-        srcVersion="${fullVersion%%+*}"
-        cachedsrcVersion="cached_postgis_sha_${srcVersion}"
-        if [ -e "$cachedsrcVersion" ];then
-            srcSha256="$(cat $cachedsrcVersion)"
-        else
-            srcSha256="$(curl -sSL "https://github.com/postgis/postgis/archive/$srcVersion.tar.gz" | sha256sum | awk '{ print $1 }')"
-            echo "$srcSha256" > "$cachedsrcVersion"
-        fi
-        cp -vf Dockerfile.postgis.template        "$img/Dockerfile"
-        cp -vf docker-postgis/Dockerfile.alpine.template "$imgalpine/Dockerfile"
-        cat Dockerfile.labels Dockerfile.args >> "$img/Dockerfile"
-        cat Dockerfile.labels Dockerfile.args >> "$imgalpine/Dockerfile"
-        if ( echo $imgalpine | egrep -q "9.3.*alpine" ) && ( grep -vq jsonb.patch "$imgalpine/Dockerfile" );then
-            sed -i -r \
-                -e '/cd \/usr\/src\/postgis/ a\     && set -o pipefail && bzip2 -dck ../jsonb.patch.bz2|patch -Np1 \\' \
-                -e '/MAINTAINER/ a ADD jsonb.patch.bz2 /usr/src' \
-                "$imgalpine/Dockerfile"
-        fi
-    sed -i 's/%%PG_MAJOR%%/'$pg_major'/g; s/%%POSTGIS_MAJOR%%/'$postgis_major'/g; s/%%POSTGIS_VERSION%%/'$fullVersion'/g' "$img/Dockerfile"
-        sed -i 's/%%PG_MAJOR%%/'"$pg_major"'/g; s/%%POSTGIS_VERSION%%/'"$srcVersion"'/g; s/%%POSTGIS_SHA256%%/'"$srcSha256"'/g' "$imgalpine/Dockerfile"
-    done
-    rsync -azv --delete corpusops/postgis-bare/9.6-2.5/        corpusops/postgis-bare/9.6/
-    rsync -azv --delete corpusops/postgis-bare/9.5-2.5/        corpusops/postgis-bare/9.5/
-    rsync -azv --delete corpusops/postgis-bare/9.4-2.5/        corpusops/postgis-bare/9.4/
-    rsync -azv --delete corpusops/postgis-bare/9.3-2.4/        corpusops/postgis-bare/9.3/
-    rsync -azv --delete corpusops/postgis-bare/9.2-2.3/        corpusops/postgis-bare/9.2/
-    rsync -azv --delete corpusops/postgis-bare/9.1-2.2/        corpusops/postgis-bare/9.1/
-    rsync -azv --delete corpusops/postgis-bare/9.0-2.1/        corpusops/postgis-bare/9.0/
-
-    rsync -azv --delete corpusops/postgis-bare/9.6-2.5-alpine/ corpusops/postgis-bare/9.6-alpine/
-    rsync -azv --delete corpusops/postgis-bare/9.5-2.5-alpine/ corpusops/postgis-bare/9.5-alpine/
-    rsync -azv --delete corpusops/postgis-bare/9.4-2.5-alpine/ corpusops/postgis-bare/9.4-alpine/
-    rsync -azv --delete corpusops/postgis-bare/9.3-2.4-alpine/ corpusops/postgis-bare/9.3-alpine/
-    rsync -azv --delete corpusops/postgis-bare/9.2-2.3-alpine/ corpusops/postgis-bare/9.2-alpine/
-
-    rsync -azv --delete corpusops/postgis-bare/9.6-2.5/        corpusops/postgis-bare/9/
-    rsync -azv --delete corpusops/postgis-bare/9.6-2.5-alpine/ corpusops/postgis-bare/9-alpine/
-
-    rsync -azv --delete corpusops/postgis-bare/10-2.5/         corpusops/postgis-bare/10/
-    rsync -azv --delete corpusops/postgis-bare/10-2.5-alpine/  corpusops/postgis-bare/10-alpine/
-
-    rsync -azv --delete corpusops/postgis-bare/11-2.5/         corpusops/postgis-bare/11/
-    rsync -azv --delete corpusops/postgis-bare/11-2.5-alpine/  corpusops/postgis-bare/11-alpine/
-
-    rsync -azv --delete corpusops/postgis-bare/11/             corpusops/postgis-bare/latest/
-    rsync -azv --delete corpusops/postgis-bare/11-alpine/      corpusops/postgis-bare/alpine/
-
-    rm -rf corpusops/postgis-bare/9.0-2.1-alpine
 }
 
 do_refresh_pgrouting() {
@@ -776,8 +659,6 @@ do_refresh_pgrouting() {
 do_refresh_images() {
     local imagess="${@:-$default_images}"
     do_refresh_ancestors
-    # code adapted from: docker-postgis/update.sh
-    do_refresh_postgis
     do_refresh_pgrouting
 }
 
@@ -1073,7 +954,7 @@ do_usage() {
 
 do_main() {
     local args=${@:-usage}
-    local actions="refresh_corpusops|refresh_images|build|gen_travis|gen|list_images|clean_tags|get_namespace_tag|refresh_ancestors|refresh_postgis|refresh_pgrouting"
+    local actions="refresh_corpusops|refresh_images|build|gen_travis|gen|list_images|clean_tags|get_namespace_tag|refresh_ancestors|refresh_pgrouting"
     actions="@($actions)"
     action=${1-};
     if [[ -n "$@" ]];then shift;fi
