@@ -530,8 +530,6 @@ is_skipped() {
     fi
     return $ret
 }
-# echo $(set -x && is_skipped library/redis/3.0.4-32bit;echo $?)
-# exit 1
 
 skip_local() {
     egrep -v "(.\/)?local"
@@ -614,11 +612,14 @@ do_clean_tags() {
 
 do_refresh_ancestors() {
     if [[ -n $SKIP_REFRESH_ANCETORS ]];then return;fi
+    IMAGES_URL="https://github.com/corpusops/docker-images"
+    if [ ! -e docker-images ];then git clone $IMAGES_URL docker-images;fi
     PGROUTING_URL="https://github.com/Starefossen/docker-pgrouting"
     if [ ! -e docker-pgrouting ];then git clone $PGROUTING_URL docker-pgrouting;fi
     ( cd docker-pgrouting && git fetch --all && git reset --hard origin/master; )
     chmod +x *sh
     chmod -x initdb-*.sh
+    rsync -azv --delete docker-images/helpers/ helpers/
 }
 
 do_refresh_pgrouting() {
@@ -638,9 +639,13 @@ do_refresh_pgrouting() {
         fi
         img="corpusops/pgrouting-bare/$version"
         for j in $img;do if [ ! -e "$j" ];then mkdir -p "$j";fi;done
-        set -ex
-        cp -vf Dockerfile.pgrouting.template        "$img/Dockerfile"
-        cat Dockerfile.labels Dockerfile.args >> "$img/Dockerfile"
+        cp -vf Dockerfile.pgrouting.template "$img/Dockerfile"
+        dockerfile="$(: \
+            && egrep    "FROM.*builder" "$img/Dockerfile" \
+            && cat Dockerfile.pre \
+            && egrep -v "FROM.*builder" "$img/Dockerfile" \
+            && cat Dockerfile.post)"
+        echo "$dockerfile" > "$img/Dockerfile"
         sed -i -r \
             -e 's/%%PG_MAJOR%%/'$pg_major'/g' \
             -e 's/%%POSTGIS_MAJOR%%/'$postgis_major'/g' \

@@ -1,4 +1,6 @@
 FROM corpusops/postgis-bare:10-2.5 as builder
+ADD helpers/ /tmp/copshelpers/
+RUN cd /tmp/copshelpers && ./up.sh
 MAINTAINER kiorky <kiorky@cryptelium.net>
 RUN bash -euxc ': \
     && apt-get update -qq \
