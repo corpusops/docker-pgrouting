@@ -672,6 +672,8 @@ do_refresh_pgrouting() {
             "$img/Dockerfile"
     done
     # for suffix in "" "-alpine";do
+    # rsync -azv --delete "corpusops/pgrouting-bare/11-2.5-2.6-alpine/" "corpusops/pgrouting-bare/alpine/"
+    rsync -azv --delete "corpusops/pgrouting-bare/11-2.5-2.6/"        "corpusops/pgrouting-bare/latest/"
     for suffix in "";do
         rsync -azv --delete "corpusops/pgrouting-bare/11-2.5-2.6$suffix/" "corpusops/pgrouting-bare/11-2.5$suffix/"
         rsync -azv --delete "corpusops/pgrouting-bare/10-2.5-2.6$suffix/" "corpusops/pgrouting-bare/10-2.5$suffix/"
