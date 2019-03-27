@@ -26,6 +26,9 @@ RUN bash -euc ': \
     '
 ENV PGROUTING_REPO=https://salsa.debian.org/debian-gis-team/pgrouting.git
 RUN bash -euxc ': \
+    && apt-get install -y --force-yes \
+        git                  \
+        ca-certificates      \
     && git clone $PGROUTING_REPO /usr/src/pgrouting'
 WORKDIR /usr/src/pgrouting
 ENV PG_MAJOR=10

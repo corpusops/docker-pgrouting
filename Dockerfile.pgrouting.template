@@ -21,6 +21,9 @@ RUN bash -euc ': \
     '
 ENV PGROUTING_REPO=%%PGROUTING_REPO%%
 RUN bash -euxc ': \
+    && apt-get install -y --force-yes \
+        git                  \
+        ca-certificates      \
     && git clone $PGROUTING_REPO /usr/src/pgrouting'
 WORKDIR /usr/src/pgrouting
 ENV PG_MAJOR=%%PG_MAJOR%%
