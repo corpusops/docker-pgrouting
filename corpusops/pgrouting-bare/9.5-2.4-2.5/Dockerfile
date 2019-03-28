@@ -30,7 +30,6 @@ RUN bash -euxc ': \
         git                  \
         ca-certificates      \
     && git clone $PGROUTING_REPO /usr/src/pgrouting'
-WORKDIR /usr/src/pgrouting
 ENV PG_MAJOR=9.5
 ENV POSTGRES_MAJOR=9.5
 ENV POSTGIS_MAJOR=2.4
@@ -38,8 +37,16 @@ ENV PGROUTING_MAJOR=2.5
 ENV PGROUTING_VERSION=2.5.2-1
 ENV PGROUTING_DEBIAN_VERSION=debian/2.5.2-1
 ARG MAKEOPTS=-j4
+WORKDIR /usr/src/pgrouting
+ADD *.patch.* ../
 RUN bash -euxc ': \
     && git reset --hard $PGROUTING_DEBIAN_VERSION \
+    && verlte() { [  "$1" = "`echo -e "$1\n$2" | sort -V | head -n1`" ]; } \
+    && : fix https://github.com/pgRouting/pgrouting/issues/963 \
+    && if ( verlte $PG_MAJOR 10 ) && ( verlte $PGROUTING_MAJOR 2.4 );then \
+        bzip2 -ckd ../10.patch.bz2|patch -Np1; \
+    fi'
+RUN bash -euxc ': \
     && sed -i -r \
          -e "s/postgresql-[0-9]+-postgis,/postgresql-$PG_MAJOR-postgis-$POSTGIS_MAJOR-scripts postgresql-$PG_MAJOR-postgis-$POSTGIS_MAJOR,/g" \
          -e "s/postgresql-[0-9]+-/postgresql-$PG_MAJOR-/g" \
