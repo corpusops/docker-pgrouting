@@ -49,11 +49,13 @@ RUN bash -euxc ': \
 RUN bash -euxc ': \
     && sed -i -r \
          -e "s/postgresql-[0-9]+-postgis,/postgresql-$PG_MAJOR-postgis-$POSTGIS_MAJOR-scripts postgresql-$PG_MAJOR-postgis-$POSTGIS_MAJOR,/g" \
-         -e "s/postgresql-[0-9]+-/postgresql-$PG_MAJOR-/g" \
+         -e "s/postgresql-[0-9]+-/postgresql-$PG_MAJOR/g" \
+         -e "s/postgis-[0-9]+\.[0-9]+/postgis-$POSTGIS_MAJOR/g" \
          -e "s/postgresql-[0-9]+-(pgrouting-scripts)/postgresql-$PG_MAJOR-\1/g" \
          -e "s/postgresql-PGVERSION-postgis,/postgresql-PGVERSION-postgis-$POSTGIS_MAJOR, postgresql-PGVERSION-postgis-$POSTGIS_MAJOR-scripts,/g" \
         debian/control* \
     && echo $PG_MAJOR > debian/pgversions \
+    && echo $POSTGIS_MAJOR-scripts && cat debian/control && exit 1 \
     && pg_buildext updatecontrol \
     && cat debian/control \
     && mk-build-deps -t "apt-get --no-install-recommends -y --force-yes" -ir debian/control'
