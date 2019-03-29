@@ -43,7 +43,7 @@ if ( grep -q "release 6" /etc/redhat-release >/dev/null 2>&1 );then
     NOSOCAT=1
 fi
 if (echo $DISTRIB_ID | egrep -iq "debian");then
-    NAPTMIRROR="http.debian.net|httpredir.debian.org"
+    NAPTMIRROR="http.debian.net|httpredir.debian.org|deb.debian.org"
 elif ( echo $DISTRIB_ID | egrep -iq "mint|ubuntu" );then
     NAPTMIRROR="archive.ubuntu.com|security.ubuntu.com"
 fi
@@ -68,6 +68,7 @@ if ( echo $DISTRIB_ID | egrep -iq "debian|mint|ubuntu" );then
         if (echo $DISTRIB_ID|egrep -iq debian) && [ $DISTRIB_RELEASE -eq $DEBIAN_OLDSTABLE ];then
             log "Using debian LTS packages"
             echo "$DEBIAN_LTS_SOURCELIST" >> /etc/apt/sources.list
+            rm -rvf /var/lib/apt/*
         fi
     fi
     if ( echo $DISTRIB_ID | egrep -iq "mint|ubuntu" ) && \
@@ -79,6 +80,8 @@ if ( echo $DISTRIB_ID | egrep -iq "debian|mint|ubuntu" );then
 fi
 if [ "x$OAPTMIRROR" != "x" ];then
     echo "Patchig APT to use $OAPTMIRROR" >&2
+    printf 'Acquire::Check-Valid-Until "0";\n' \
+        > /etc/apt/apt.conf.d/noreleaseexpired.conf
     sed -i -r -e 's!'$NAPTMIRROR'!'$OAPTMIRROR'!g' \
         $( find /etc/apt/sources.list* -type f; )
 fi

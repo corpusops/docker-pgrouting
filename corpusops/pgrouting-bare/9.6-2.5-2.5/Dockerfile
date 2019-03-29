@@ -55,7 +55,6 @@ RUN bash -euxc ': \
          -e "s/postgresql-PGVERSION-postgis,/postgresql-PGVERSION-postgis-$POSTGIS_MAJOR, postgresql-PGVERSION-postgis-$POSTGIS_MAJOR-scripts,/g" \
         debian/control* \
     && echo $PG_MAJOR > debian/pgversions \
-    && echo $POSTGIS_MAJOR-scripts && cat debian/control && exit 1 \
     && pg_buildext updatecontrol \
     && cat debian/control \
     && mk-build-deps -t "apt-get --no-install-recommends -y --force-yes" -ir debian/control'
