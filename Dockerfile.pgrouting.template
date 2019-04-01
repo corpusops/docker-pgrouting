@@ -42,9 +42,9 @@ WORKDIR /usr/src/pgrouting
 ADD *.patch.* ../
 RUN bash -euxc ': \
     && git reset --hard $PGROUTING_DEBIAN_VERSION \
-    && cp -rf debian debian.bak \
-    && git reset --hard $PGROUTING_UPSTREAM_VERSION \
-    && cp -rf debian.bak debian \
+    && : cp -rf debian debian.bak \
+    && : git reset --hard $PGROUTING_UPSTREAM_VERSION \
+    && : cp -rf debian.bak debian \
     && verlte() { [  "$1" = "`echo -e "$1\n$2" | sort -V | head -n1`" ]; } \
     && : fix https://github.com/pgRouting/pgrouting/issues/963 \
     && if ( verlte $PG_MAJOR 10 ) && ( verlte $PGROUTING_MAJOR 2.4 );then \
