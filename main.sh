@@ -271,27 +271,27 @@ corpusops/pgrouting-bare/11-2.5-2.6\
  corpusops/pgrouting-bare/10-2.4-2.6\
  corpusops/pgrouting-bare/11-2.5-2.5\
  corpusops/pgrouting-bare/10-2.5-2.5\
- corpusops/pgrouting-bare/10-2.5-2.4::30
+ corpusops/pgrouting-bare/10-2.5-2.4::7
 corpusops/pgrouting-bare/10-2.4-2.5\
  corpusops/pgrouting-bare/10-2.4-2.4\
  corpusops/pgrouting-bare/9.6-2.5-2.6\
  corpusops/pgrouting-bare/9.6-2.4-2.6\
  corpusops/pgrouting-bare/9.5-2.5-2.6\
- corpusops/pgrouting-bare/9.4-2.4-2.6::30
+ corpusops/pgrouting-bare/9.4-2.4-2.6::7
 corpusops/pgrouting-bare/9.6-2.5-2.5\
  corpusops/pgrouting-bare/9.5-2.4-2.6\
  corpusops/pgrouting-bare/9.4-2.5-2.6\
  corpusops/pgrouting-bare/9.6-2.5-2.4\
  corpusops/pgrouting-bare/9.6-2.4-2.5\
- corpusops/pgrouting-bare/9.6-2.4-2.4\
- corpusops/pgrouting-bare/9.5-2.5-2.5::30
+ corpusops/pgrouting-bare/9.6-2.4-2.4::7
 corpusops/pgrouting-bare/9.5-2.5-2.4\
- corpusops/pgrouting-bare/9.5-2.4-2.5\
  corpusops/pgrouting-bare/9.5-2.4-2.4\
  corpusops/pgrouting-bare/9.4-2.5-2.5\
  corpusops/pgrouting-bare/9.4-2.5-2.4\
  corpusops/pgrouting-bare/9.4-2.4-2.5\
- corpusops/pgrouting-bare/9.4-2.4-2.4::30
+ corpusops/pgrouting-bare/9.4-2.4-2.4::7
+corpusops/pgrouting-bare/9.5-2.4-2.5\
+ corpusops/pgrouting-bare/9.5-2.5-2.5::7
 "
 SKIP_REFRESH_ANCETORS=${SKIP_REFRESH_ANCETORS-}
 POSTGIS_MINOR_TAGS="
