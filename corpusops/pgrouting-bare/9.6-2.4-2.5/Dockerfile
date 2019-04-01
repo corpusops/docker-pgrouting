@@ -25,22 +25,31 @@ RUN bash -euc ': \
         postgresql-server-dev-all \
     '
 ENV PGROUTING_REPO=https://salsa.debian.org/debian-gis-team/pgrouting.git
+ENV PGROUTING_UPSTREAM_REPO=https://github.com/pgRouting/pgrouting.git
 RUN bash -euxc ': \
     && apt-get install -y --force-yes \
         git                  \
         ca-certificates      \
-    && git clone $PGROUTING_REPO /usr/src/pgrouting'
+    && git clone $PGROUTING_REPO /usr/src/pgrouting \
+    && cd /usr/src/pgrouting \
+    && git remote add pgrouting $PGROUTING_UPSTREAM_REPO \
+    && git fetch pgrouting \
+    '
 ENV PG_MAJOR=9.6
 ENV POSTGRES_MAJOR=9.6
 ENV POSTGIS_MAJOR=2.4
 ENV PGROUTING_MAJOR=2.5
 ENV PGROUTING_VERSION=2.5.2-1
 ENV PGROUTING_DEBIAN_VERSION=debian/2.5.2-1
+ENV PGROUTING_UPSTREAM_VERSION=v2.5.5
 ARG MAKEOPTS=-j4
 WORKDIR /usr/src/pgrouting
 ADD *.patch.* ../
 RUN bash -euxc ': \
     && git reset --hard $PGROUTING_DEBIAN_VERSION \
+    && cp -rf debian debian.bak \
+    && git reset --hard $PGROUTING_UPSTREAM_VERSION \
+    && cp -rf debian.bak debian \
     && verlte() { [  "$1" = "`echo -e "$1\n$2" | sort -V | head -n1`" ]; } \
     && : fix https://github.com/pgRouting/pgrouting/issues/963 \
     && if ( verlte $PG_MAJOR 10 ) && ( verlte $PGROUTING_MAJOR 2.4 );then \

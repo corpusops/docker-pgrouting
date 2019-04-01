@@ -341,6 +341,7 @@ packagesJessie="$(echo "$packagesUrlJessie" | sed -r 's/[^a-zA-Z.-]+/-/g')"
 packagesUrlStretch='http://apt.postgresql.org/pub/repos/apt/dists/stretch-pgdg/main/binary-amd64/Packages'
 packagesStretch="$(echo "$packagesUrlStretch" | sed -r 's/[^a-zA-Z.-]+/-/g')"
 PGROUTING_REPO="${PGROUTING_REPO:-"https://salsa.debian.org/debian-gis-team/pgrouting.git"}"
+PGROUTING_UPSTREAM_REPO="${PGROUTING_UPSTREAM_REPO:-"https://github.com/pgRouting/pgrouting.git"}"
 
 declare -A duplicated_tags
 declare -A registry_tokens
@@ -627,10 +628,13 @@ do_refresh_pgrouting() {
     # debian/2.6.2-1
     # upstream/2.0.0
     PGROUTING_TAGS="$(git ls-remote -q  --refs --tags "$PGROUTING_REPO"|sed -re 's!.*tags/((upstream|debian)/)?!\1!g'|egrep "[0-9]"|awk '!seen[$0]++'|sort -V)"
+    PGROUTING_VUPSTREAM_TAGS="$(git ls-remote -q  --refs --tags "$PGROUTING_UPSTREAM_REPO"|sed -re 's!.*tags/((upstream|debian)/)?!\1!g'|egrep "v[0-9]"|awk '!seen[$0]++'|sort -V)"
     PGROUTING_DEBIAN_TAGS="$(echo "$PGROUTING_TAGS"|grep debian|sed -re "s|.*/||g")"
+    PGROUTING_UPSTREAM_TAGS="$(echo "$PGROUTING_VUPSTREAM_TAGS"|sed -re "s|.*/||g")"
     for version in $PGROUTING_MINOR_TAGS;do
         IFS=- read pg_major postgis_major pgrouting_major <<< "$version"
         tpgrouting_version=$(echo "$PGROUTING_TAGS"|egrep "^debian/$pgrouting_major"|sort -V|tail -n1)
+        pgrouting_upstream_version=$(echo "$PGROUTING_UPSTREAM_TAGS"|egrep "^v$pgrouting_major"|sort -V|tail -n1)
         pgrouting_debian_version="${tpgrouting_version}"
         pgrouting_version="${tpgrouting_version//*\//}"
         if [[ -z $pgrouting_debian_version ]];then
@@ -649,10 +653,12 @@ do_refresh_pgrouting() {
         sed -i -r \
             -e 's/%%PG_MAJOR%%/'$pg_major'/g' \
             -e 's/%%POSTGIS_MAJOR%%/'$postgis_major'/g' \
+            -e 's!%%PGROUTING_UPSTREAM_REPO%%!'$PGROUTING_UPSTREAM_REPO'!g' \
             -e 's!%%PGROUTING_REPO%%!'$PGROUTING_REPO'!g' \
             -e 's!%%PGROUTING_TAG%%!'$PGROUTING_DEBIAN_TAG'!g' \
             -e 's/%%PGROUTING_MAJOR%%/'$pgrouting_major'/g' \
             -e 's!%%PGROUTING_VERSION%%!'$pgrouting_version'!g' \
+            -e 's!%%PGROUTING_UPSTREAM_VERSION%%!'$pgrouting_upstream_version'!g' \
             -e 's!%%PGROUTING_DEBIAN_VERSION%%!'$pgrouting_debian_version'!g' \
             "$img/Dockerfile"
     done
@@ -764,8 +770,7 @@ record_build_image() {
     # rsync -azv --delete "corpusops/pgrouting-bare/11-2.5-2.6-alpine/" "corpusops/pgrouting-bare/alpine/"
 
     local release_tags="$itag"
-    for alt_tag in ${duplicated_tags[$itag]};do
-        release_tags="$release_tags $alt_tag"
+    for alt_tag in ${duplicated_tags[$itag]};do release_tags="$release_tags $alt_tag"
         run="$run && docker tag $itag $alt_tag"
     done
     if [[ -n "$DO_RELEASE" ]];then

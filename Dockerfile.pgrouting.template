@@ -20,22 +20,31 @@ RUN bash -euc ': \
         postgresql-server-dev-all \
     '
 ENV PGROUTING_REPO=%%PGROUTING_REPO%%
+ENV PGROUTING_UPSTREAM_REPO=%%PGROUTING_UPSTREAM_REPO%%
 RUN bash -euxc ': \
     && apt-get install -y --force-yes \
         git                  \
         ca-certificates      \
-    && git clone $PGROUTING_REPO /usr/src/pgrouting'
+    && git clone $PGROUTING_REPO /usr/src/pgrouting \
+    && cd /usr/src/pgrouting \
+    && git remote add pgrouting $PGROUTING_UPSTREAM_REPO \
+    && git fetch pgrouting \
+    '
 ENV PG_MAJOR=%%PG_MAJOR%%
 ENV POSTGRES_MAJOR=%%PG_MAJOR%%
 ENV POSTGIS_MAJOR=%%POSTGIS_MAJOR%%
 ENV PGROUTING_MAJOR=%%PGROUTING_MAJOR%%
 ENV PGROUTING_VERSION=%%PGROUTING_VERSION%%
 ENV PGROUTING_DEBIAN_VERSION=%%PGROUTING_DEBIAN_VERSION%%
+ENV PGROUTING_UPSTREAM_VERSION=%%PGROUTING_UPSTREAM_VERSION%%
 ARG MAKEOPTS=-j4
 WORKDIR /usr/src/pgrouting
 ADD *.patch.* ../
 RUN bash -euxc ': \
     && git reset --hard $PGROUTING_DEBIAN_VERSION \
+    && cp -rf debian debian.bak \
+    && git reset --hard $PGROUTING_UPSTREAM_VERSION \
+    && cp -rf debian.bak debian \
     && verlte() { [  "$1" = "`echo -e "$1\n$2" | sort -V | head -n1`" ]; } \
     && : fix https://github.com/pgRouting/pgrouting/issues/963 \
     && if ( verlte $PG_MAJOR 10 ) && ( verlte $PGROUTING_MAJOR 2.4 );then \
