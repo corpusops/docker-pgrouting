@@ -47,9 +47,13 @@ WORKDIR /usr/src/pgrouting
 ADD *.patch.* ../
 RUN bash -euxc ': \
     && git reset --hard $PGROUTING_DEBIAN_VERSION \
-    && : cp -rf debian debian.bak \
-    && : git reset --hard $PGROUTING_UPSTREAM_VERSION \
-    && : cp -rf debian.bak debian \
+    && use_upstream="" \
+    && if [ "$POSTGRES_MAJOR-$POSTGIS_MAJOR-$PGROUTING_MAJOR" = "11-2.5-2.5" ];then use_upstream="1";fi \
+    && if [ "x$use_upstream" = "x1" ];then \
+        cp -rf debian debian.bak \
+        && git reset --hard $PGROUTING_UPSTREAM_VERSION \
+        && cp -rf debian.bak debian; \
+    fi \
     && verlte() { [  "$1" = "`echo -e "$1\n$2" | sort -V | head -n1`" ]; } \
     && : fix https://github.com/pgRouting/pgrouting/issues/963 \
     && if ( verlte $PG_MAJOR 10 ) && ( verlte $PGROUTING_MAJOR 2.4 );then \
