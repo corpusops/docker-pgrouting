@@ -8,7 +8,6 @@ export PGUSER="$POSTGRES_USER"
 for DB in template_postgis "$POSTGRES_DB"; do
     echo "Loading pgrouting extensions into $DB"
     "${psql[@]}" --dbname="$DB" <<-'EOSQL'
-    psql --dbname="$POSTGRES_DB" <<EOSQL
     CREATE EXTENSION IF NOT EXISTS postgis;
     CREATE EXTENSION IF NOT EXISTS pgrouting;
 EOSQL
