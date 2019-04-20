@@ -61,5 +61,3 @@
       - ``pgrouting > 2.6 : postgis >= 2.2``
       - ``pgrouting < 2.5 : postgis >= 2.0``
 
-## Support development
-- [paypal](https://paypal.me/kiorky)
