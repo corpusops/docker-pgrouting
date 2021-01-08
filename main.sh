@@ -285,52 +285,54 @@ POSTGIS_MINOR_TAGS="
 9.2-2.2 9.2-2.3
 9.2-2.3
 9.3-2.3 9.3-2.4
+9.4-2.3 9.4-2.4 9.5-2.4 9.6-2.4
+9.4-2.5 9.5-2.5 9.6-2.5
 10-2.4 10-2.5 10-3
 11-2.5 11-3
 12-2.5 12-3
 13-3
 "
+
 PGROUTING_MINOR_TAGS="
+
+13-3-3.1
+12-3-3.1
+11-3-3.1
+12-3-3.0
+11-2.5-2.6
+10-2.5-2.6
+9.6-2.5-2.6
+
+9.4-2.4-2.4
+9.4-2.4-2.5
+9.4-2.4-2.6
 9.5-2.4-2.4
 9.5-2.4-2.5
 9.5-2.4-2.6
 9.6-2.4-2.4
 9.6-2.4-2.5
 9.6-2.4-2.6
+9.4-2.5-2.4
+9.4-2.5-2.5
+9.4-2.5-2.6
 9.5-2.5-2.4
 9.5-2.5-2.5
 9.5-2.5-2.6
 9.6-2.5-2.4
 9.6-2.5-2.5
-9.6-2.5-2.6
 10-2.4-2.4
 10-2.4-2.5
 10-2.4-2.6
 10-2.5-2.4
 10-2.5-2.5
-10-2.5-2.6
-11-2.5-2.4
 11-2.5-2.5
-11-2.5-2.6
 12-2.5-2.6
 12-2.5-2.6
 12-2.5-2.6
 11-3-3.0
-11-3-3.1
-12-3-3.0
-12-3-3.1
 13-3-3.0
-13-3-3.1
 "
 BATCHED_IMAGES="
-corpusops/pgrouting-bare/13-3-3.1\
- corpusops/pgrouting-bare/12-3-3.1\
- corpusops/pgrouting-bare/11-3-3.1\
- corpusops/pgrouting-bare/10-3-3.1\
- corpusops/pgrouting-bare/12-2.5-2.6\
- corpusops/pgrouting-bare/11-2.5-2.6\
- corpusops/pgrouting-bare/10-2.5-2.6\
- corpusops/pgrouting-bare/9.6-2.5-2.6::40
 "
 for i in $PGROUTING_MINOR_TAGS;do
     t=corpusops/pgrouting-bare/$i
@@ -749,7 +751,7 @@ set_global_tags() {
         set_global_tag "corpusops/pgrouting-bare:11-2.5-2.6$suffix" "corpusops/pgrouting-bare:11$suffix"
         set_global_tag "corpusops/pgrouting-bare:10-2.5-2.6$suffix" "corpusops/pgrouting-bare:10$suffix"
         pgrouting9ver="2.5"
-        for i in 9.5 9.6;do
+        for i in 9.4 9.5 9.6;do
             for j in 2.4 2.5;do
                 set_global_tag \
                     "corpusops/pgrouting-bare:${i}-${j}-${pgrouting9ver}$suffix" \
