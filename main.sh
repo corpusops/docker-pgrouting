@@ -744,7 +744,7 @@ set_global_tags() {
         set_global_tag "corpusops/pgrouting-bare:12-3-3.1$suffix"     "corpusops/pgrouting-bare:12-3$suffix"
         set_global_tag "corpusops/pgrouting-bare:12-3-3.1$suffix"     "corpusops/pgrouting-bare:12$suffix"
         set_global_tag "corpusops/pgrouting-bare:11-3-3.1$suffix"     "corpusops/pgrouting-bare:11-3$suffix"
-        set_global_tag "corpusops/pgrouting-bare:12-2.5-2.6$suffix" "corpusops/pgrouting-bare:11-2.5$suffix"
+        set_global_tag "corpusops/pgrouting-bare:12-2.5-2.6$suffix" "corpusops/pgrouting-bare:12-2.5$suffix"
         set_global_tag "corpusops/pgrouting-bare:11-2.5-2.6$suffix" "corpusops/pgrouting-bare:11-2.5$suffix"
         set_global_tag "corpusops/pgrouting-bare:10-2.5-2.6$suffix" "corpusops/pgrouting-bare:10-2.5$suffix"
         set_global_tag "corpusops/pgrouting-bare:10-2.4-2.6$suffix" "corpusops/pgrouting-bare:10-2.4$suffix"
