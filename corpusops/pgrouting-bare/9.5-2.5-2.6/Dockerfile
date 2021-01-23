@@ -16,14 +16,22 @@ RUN bash -euc ': \
         libboost-thread-dev  \
         libboost-graph-dev   \
         libcgal-dev          \
-        python-sphinx        \
         graphviz             \
         texlive              \
         texlive-font-utils   \
         texlive-latex-extra  \
         ghostscript          \
         postgresql-server-dev-all \
-    '
+#       python3-pip python-pip \
+#       doxygen                \
+#       python3-sphinx         \
+'
+# RUN bash -euc ': \
+#     && rm /usr/bin/sphinx-build \
+#     && ln -sfv /usr/local/bin/sphinx-build /usr/bin \
+#     && python  -m pip install "sphinx>1.8" \
+#     && python3 -m pip install "sphinx>1.8" \
+#     '
 ENV PGROUTING_REPO=https://salsa.debian.org/debian-gis-team/pgrouting.git
 ENV PGROUTING_UPSTREAM_REPO=https://github.com/pgRouting/pgrouting.git
 RUN bash -euxc ': \
@@ -39,9 +47,9 @@ ENV PG_MAJOR=9.5
 ENV POSTGRES_MAJOR=9.5
 ENV POSTGIS_MAJOR=2.5
 ENV PGROUTING_MAJOR=2.6
-ENV PGROUTING_VERSION=2.6.2-1
-ENV PGROUTING_DEBIAN_VERSION=debian/2.6.2-1
-ENV PGROUTING_UPSTREAM_VERSION=v2.6.2
+ENV PGROUTING_VERSION=2.6.3-1
+ENV PGROUTING_DEBIAN_VERSION=debian/2.6.3-1
+ENV PGROUTING_UPSTREAM_VERSION=v2.6.3
 ARG MAKEOPTS=-j4
 WORKDIR /usr/src/pgrouting
 ADD *.patch.* ../
@@ -60,24 +68,34 @@ RUN bash -euxc ': \
         bzip2 -ckd ../10.patch.bz2|patch -Np1; \
     fi'
 RUN bash -euxc ': \
+    && cp debian/control debian/control.bak\
+    && cp debian/rules   debian/rules.bak\
     && sed -i -r \
-         -e "s/postgresql-[0-9]+-postgis,/postgresql-$PG_MAJOR-postgis-$POSTGIS_MAJOR-scripts postgresql-$PG_MAJOR-postgis-$POSTGIS_MAJOR,/g" \
-         -e "s/postgresql-[0-9]+-/postgresql-$PG_MAJOR/g" \
-         -e "s/postgis-[0-9]+\.[0-9]+/postgis-$POSTGIS_MAJOR/g" \
-         -e "s/postgresql-[0-9]+-(pgrouting-scripts)/postgresql-$PG_MAJOR-\1/g" \
-         -e "s/postgresql-PGVERSION-postgis,/postgresql-PGVERSION-postgis-$POSTGIS_MAJOR, postgresql-PGVERSION-postgis-$POSTGIS_MAJOR-scripts,/g" \
-        debian/control* \
+    -e "s/postgresql-[0-9]+-postgis,/postgresql-$PG_MAJOR-postgis-$POSTGIS_MAJOR-scripts postgresql-$PG_MAJOR-postgis-$POSTGIS_MAJOR,/g" \
+    -e "/(python3-sphinx \(>= ).*\)/ d" \
+    -e "s/postgresql-[0-9]+-/postgresql-$PG_MAJOR/g" \
+    -e "s/postgis-[0-9]+\.[0-9]+/postgis-$POSTGIS_MAJOR/g" \
+    -e "s/postgresql-[0-9]+-(pgrouting-scripts)/postgresql-$PG_MAJOR-\1/g" \
+    -e "s/postgresql-PGVERSION-postgis,/postgresql-PGVERSION-postgis-$POSTGIS_MAJOR, postgresql-PGVERSION-postgis-$POSTGIS_MAJOR-scripts,/g" \
+    -e  "/^Package:.*doc/,$ d" \
+    debian/control* \
+    && : "doc relies on sphinx, which do not built on old debs, in docker we wont need it, disabling." \
+    && rm -f debian/postgresql-pgrouting-doc.doc-base.in \
+    && sed -i -re "s/ --with sphinxdoc| -DWITH_DOC=ON//g" -e "/sphinx|doc-base|doc\/html|pgrouting-doc/ d" debian/rules \
+    && : "rebuild glue" \
     && echo $PG_MAJOR > debian/pgversions \
     && pg_buildext updatecontrol \
-    && cat debian/control \
-    && mk-build-deps -t "apt-get --no-install-recommends -y --force-yes" -ir debian/control'
-RUN bash -euxc ': \
-    && debuild -i -us -uc -b'
+    && ( diff -u debian/rules.bak   debian/rules  ||true )\
+    && ( diff -u debian/control.bak debian/control||true )\
+    && cat debian/control\
+    '
+RUN mk-build-deps -t "apt-get --no-install-recommends -y --force-yes -o Debug::pkgProblemResolver=yes" -ir debian/control
+RUN debuild -i -us -uc -b
 
 FROM corpusops/postgis-bare:9.5-2.5
 MAINTAINER kiorky <kiorky@cryptelium.net>
 ENV PGROUTING_MAJOR 2.6
-ENV PGROUTING_VERSION 2.6.2-1
+ENV PGROUTING_VERSION 2.6.3-1
 COPY --from=builder /usr/src/*deb /tmp/
 COPY ./initdb-pgrouting.sh /docker-entrypoint-initdb.d/routing.sh
 RUN bash -euxc ': \
