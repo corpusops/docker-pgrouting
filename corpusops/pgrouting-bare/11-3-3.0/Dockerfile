@@ -1,4 +1,4 @@
-FROM corpusops/postgis-bare:10-2.4 as builder
+FROM corpusops/postgis-bare:11-3 as builder
 ARG NONINTERACTIVE=y
 ADD helpers/ /tmp/copshelpers/
 RUN cd /tmp/copshelpers && ./up.sh \
@@ -43,13 +43,13 @@ RUN bash -euxc ': \
     && git remote add pgrouting $PGROUTING_UPSTREAM_REPO \
     && git fetch pgrouting \
     '
-ENV PG_MAJOR=10
-ENV POSTGRES_MAJOR=10
-ENV POSTGIS_MAJOR=2.4
-ENV PGROUTING_MAJOR=2.4
-ENV PGROUTING_VERSION=2.4.2-1
-ENV PGROUTING_DEBIAN_VERSION=debian/2.4.2-1
-ENV PGROUTING_UPSTREAM_VERSION=v2.4.2
+ENV PG_MAJOR=11
+ENV POSTGRES_MAJOR=11
+ENV POSTGIS_MAJOR=3
+ENV PGROUTING_MAJOR=3.0
+ENV PGROUTING_VERSION=3.0.2-1
+ENV PGROUTING_DEBIAN_VERSION=debian/3.0.2-1
+ENV PGROUTING_UPSTREAM_VERSION=v3.0.4
 ARG MAKEOPTS=-j4
 WORKDIR /usr/src/pgrouting
 ADD *.patch.* ../
@@ -92,10 +92,10 @@ RUN bash -euxc ': \
 RUN mk-build-deps -t "apt-get --no-install-recommends -y --force-yes -o Debug::pkgProblemResolver=yes" -ir debian/control
 RUN debuild -i -us -uc -b
 
-FROM corpusops/postgis-bare:10-2.4
+FROM corpusops/postgis-bare:11-3
 MAINTAINER kiorky <kiorky@cryptelium.net>
-ENV PGROUTING_MAJOR 2.4
-ENV PGROUTING_VERSION 2.4.2-1
+ENV PGROUTING_MAJOR 3.0
+ENV PGROUTING_VERSION 3.0.2-1
 COPY --from=builder /usr/src/*deb /tmp/
 COPY ./initdb-pgrouting.sh /docker-entrypoint-initdb.d/routing.sh
 RUN bash -euxc ': \
