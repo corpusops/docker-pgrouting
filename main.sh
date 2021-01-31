@@ -285,26 +285,18 @@ POSTGIS_MINOR_TAGS="
 9.2-2.2 9.2-2.3
 9.2-2.3
 9.3-2.3 9.3-2.4
-9.4-2.3 9.4-2.4 9.5-2.4 9.6-2.4
-9.4-2.5 9.5-2.5 9.6-2.5
 10-2.4 10-2.5 10-3
 11-2.5 11-3
 12-2.5 12-3
 13-3
 "
 PGROUTING_MINOR_TAGS="
-9.4-2.4-2.4
-9.4-2.4-2.5
-9.4-2.4-2.6
 9.5-2.4-2.4
 9.5-2.4-2.5
 9.5-2.4-2.6
 9.6-2.4-2.4
 9.6-2.4-2.5
 9.6-2.4-2.6
-9.4-2.5-2.4
-9.4-2.5-2.5
-9.4-2.5-2.6
 9.5-2.5-2.4
 9.5-2.5-2.5
 9.5-2.5-2.6
@@ -757,7 +749,7 @@ set_global_tags() {
         set_global_tag "corpusops/pgrouting-bare:11-2.5-2.6$suffix" "corpusops/pgrouting-bare:11$suffix"
         set_global_tag "corpusops/pgrouting-bare:10-2.5-2.6$suffix" "corpusops/pgrouting-bare:10$suffix"
         pgrouting9ver="2.5"
-        for i in 9.4 9.5 9.6;do
+        for i in 9.5 9.6;do
             for j in 2.4 2.5;do
                 set_global_tag \
                     "corpusops/pgrouting-bare:${i}-${j}-${pgrouting9ver}$suffix" \
