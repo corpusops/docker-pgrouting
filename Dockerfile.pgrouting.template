@@ -54,7 +54,7 @@ RUN bash -euxc ': \
     && if [ "$POSTGRES_MAJOR-$POSTGIS_MAJOR-$PGROUTING_MAJOR" = "11-2.5-2.5" ];then use_upstream="1";fi \
     && if [ "x$use_upstream" = "x1" ];then \
         cp -rf debian debian.bak \
-        && git reset --hard $PGROUTING_UPSTREAM_VERSION \
+        && git reset --hard $(echo $PGROUTING_UPSTREAM_VERSION|sed -re "s/v2.5../v2.5.3/g") \
         && cp -rf debian.bak debian; \
     fi \
     && verlte() { [  "$1" = "`echo -e "$1\n$2" | sort -V | head -n1`" ]; } \
