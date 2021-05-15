@@ -277,7 +277,38 @@ find_top_node_() {
 find_top_node() { (set +e && find_top_node_ && set -e;); }
 NODE_TOP="$(echo $(find_top_node))"
 MAILU_VERSiON=1.7
-BATCHED_IMAGES=""
+BATCHED_IMAGES="
+corpusops/pgrouting-bare/9.4-2.4-2.4\
+ corpusops/pgrouting-bare/9.4-2.5-2.4\
+ corpusops/pgrouting-bare/9.4-2.5-2.6\
+ corpusops/pgrouting-bare/9.5-2.4-2.4\
+ corpusops/pgrouting-bare/9.5-2.4-2.5\
+ corpusops/pgrouting-bare/9.5-2.4-2.6\
+ corpusops/pgrouting-bare/9.5-2.5-2.4\
+ corpusops/pgrouting-bare/9.5-2.5-2.5\
+ corpusops/pgrouting-bare/9.5-2.5-2.6::30
+corpusops/pgrouting-bare/9.6-2.4-2.4\
+ corpusops/pgrouting-bare/9.6-2.4-2.5\
+ corpusops/pgrouting-bare/9.6-2.4-2.6\
+ corpusops/pgrouting-bare/9.6-2.5-2.4\
+ corpusops/pgrouting-bare/9.6-2.5-2.5\
+ corpusops/pgrouting-bare/9.6-2.5-2.6::30
+corpusops/pgrouting-bare/10-2.4-2.4\
+ corpusops/pgrouting-bare/10-2.4-2.5\
+ corpusops/pgrouting-bare/10-2.4-2.6\
+ corpusops/pgrouting-bare/10-2.5-2.4\
+ corpusops/pgrouting-bare/10-2.5-2.5\
+ corpusops/pgrouting-bare/10-2.5-2.6::30
+corpusops/pgrouting-bare/11-2.5-2.5\
+ corpusops/pgrouting-bare/11-2.5-2.6\
+ corpusops/pgrouting-bare/11-3-3.0\
+ corpusops/pgrouting-bare/11-3-3.1::30
+corpusops/pgrouting-bare/12-2.5-2.6\
+ corpusops/pgrouting-bare/12-3-3.0\
+ corpusops/pgrouting-bare/12-3-3.1\
+ corpusops/pgrouting-bare/13-3-3.0\
+ corpusops/pgrouting-bare/13-3-3.1::30
+"
 SKIP_REFRESH_ANCESTORS=${SKIP_REFRESH_ANCESTORS-}
 POSTGIS_MINOR_TAGS="
 9.0-2.1
@@ -329,14 +360,14 @@ PGROUTING_MINOR_TAGS="
 11-3-3.0
 13-3-3.0
 "
-BATCHED_IMAGES="
-"
-for i in $PGROUTING_MINOR_TAGS;do
-    t=corpusops/pgrouting-bare/$i
-    if ! ( echo "$BATCHED_IMAGES" | grep -q $t );then
-        BATCHED_IMAGES="$(printf "$BATCHED_IMAGES\n$t::2")"
-    fi
-done
+# BATCHED_IMAGES="
+# "
+# for i in $PGROUTING_MINOR_TAGS;do
+#     t=corpusops/pgrouting-bare/$i
+#     if ! ( echo "$BATCHED_IMAGES" | grep -q $t );then
+#         BATCHED_IMAGES="$(printf "$BATCHED_IMAGES\n$t::2")"
+#     fi
+# done
 POSTGRES_MAJOR="9 10 11 12 13"
 packagesUrlJessie='http://apt.postgresql.org/pub/repos/apt/dists/jessie-pgdg/main/binary-amd64/Packages'
 packagesJessie="local/$(echo "$packagesUrlJessie" | sed -r 's/[^a-zA-Z.-]+/-/g')"
