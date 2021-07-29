@@ -47,9 +47,9 @@ ENV PG_MAJOR=13
 ENV POSTGRES_MAJOR=13
 ENV POSTGIS_MAJOR=3
 ENV PGROUTING_MAJOR=3.1
-ENV PGROUTING_VERSION=3.1.2-1
-ENV PGROUTING_DEBIAN_VERSION=debian/3.1.2-1
-ENV PGROUTING_UPSTREAM_VERSION=v3.1.2
+ENV PGROUTING_VERSION=3.1.3-1
+ENV PGROUTING_DEBIAN_VERSION=debian/3.1.3-1
+ENV PGROUTING_UPSTREAM_VERSION=v3.1.3
 ARG MAKEOPTS=-j4
 WORKDIR /usr/src/pgrouting
 ADD *.patch.* ../
@@ -97,7 +97,7 @@ RUN debuild -i -us -uc -b
 FROM corpusops/postgis-bare:13-3
 MAINTAINER kiorky <kiorky@cryptelium.net>
 ENV PGROUTING_MAJOR 3.1
-ENV PGROUTING_VERSION 3.1.2-1
+ENV PGROUTING_VERSION 3.1.3-1
 COPY --from=builder /usr/src/*deb /tmp/
 COPY ./initdb-pgrouting.sh /docker-entrypoint-initdb.d/routing.sh
 RUN bash -euxc ': \
