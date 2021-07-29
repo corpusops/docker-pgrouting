@@ -278,9 +278,7 @@ find_top_node() { (set +e && find_top_node_ && set -e;); }
 NODE_TOP="$(echo $(find_top_node))"
 MAILU_VERSiON=1.7
 BATCHED_IMAGES="
-corpusops/pgrouting-bare/9.4-2.4-2.4\
- corpusops/pgrouting-bare/9.4-2.5-2.4\
- corpusops/pgrouting-bare/9.4-2.5-2.6\
+corpusops/pgrouting-bare/9.4-2.5-2.6\
  corpusops/pgrouting-bare/9.5-2.4-2.4\
  corpusops/pgrouting-bare/9.5-2.4-2.5\
  corpusops/pgrouting-bare/9.5-2.4-2.6\
@@ -334,14 +332,12 @@ PGROUTING_MINOR_TAGS="
 10-2.5-2.6
 9.6-2.5-2.6
 
-9.4-2.4-2.4
 9.5-2.4-2.4
 9.5-2.4-2.5
 9.5-2.4-2.6
 9.6-2.4-2.4
 9.6-2.4-2.5
 9.6-2.4-2.6
-9.4-2.5-2.4
 9.4-2.5-2.6
 9.5-2.5-2.4
 9.5-2.5-2.5
