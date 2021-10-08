@@ -221,6 +221,8 @@ FORCE_REBUILD=${FORCE_REBUILD-}
 DRYRUN=${DRYRUN-}
 NOREFRESH=${NOREFRESH-}
 NBPARALLEL=${NBPARALLEL-2}
+SKIP_TAGS_REBUILD=${SKIP_TAGS_REBUILD-}
+SKIP_TAGS_REFRESH=${SKIP_TAGS_REFRESH-${SKIP_TAGS_REBUILD}}
 SKIP_IMAGES_SCAN=${SKIP_IMAGES_SCAN-}
 SKIP_MINOR_ES="((elasticsearch):.*([0-5]\.?){3}(-32bit.*)?)"
 SKIP_MINOR_ES2="$SKIP_MINOR_ES|(elasticsearch:(5\.[0-4]\.)|(6\.8\.[0-8])|(6\.[0-7])|(7\.9\.[0-2])|(7\.[0-8]))"
@@ -510,6 +512,7 @@ get_image_changeset() {
     echo "$ret"
 }
 
+do_gen_image() { gen_image "$@"; }
 gen_image() {
     local image=$1 tag=$2
     local ldir="$TOPDIR/$image/$tag"
@@ -536,7 +539,7 @@ gen_image() {
         local df="$folder/Dockerfile.override"
         if [ -e "$df" ];then dockerfiles="$dockerfiles $df" && break;fi
     done
-    local parts="from args argspost helpers pre base post clean cleanpost labels labelspost"
+    local parts="from args argspost helpers pre base post clean cleanpost extra labels labelspost"
     for order in $parts;do
         for folder in . .. ../../..;do
             local df="$folder/Dockerfile.$order"
@@ -590,10 +593,12 @@ do_get_namespace_tag() {
             # ubuntu-bare / postgis
             if [ -e $i/tag ];then tag=$( cat $i/tag );break;fi
         done
-        echo "$repo/$tag:$version"
+        echo "$repo/$tag:$version" \
+            | sed -re "s/(-?(server)?-(web-vault|postgresql|mysql)):/-server:\3-/g"
     done
 }
 
+do_get_image_tags() { get_image_tags "$@"; }
 get_image_tags() {
     local n=$1
     local results="" result=""
@@ -607,7 +612,7 @@ get_image_tags() {
     else
         has_more=0
     fi
-    if [ $has_more -eq 0 ];then
+    if [[ -z ${SKIP_TAGS_REFRESH} ]] && [ $has_more -eq 0 ];then
         while [ $has_more -eq 0 ];do
             i=$((i+1))
             result=$( curl "${u}?page=${i}" 2>/dev/null \
@@ -618,10 +623,12 @@ get_image_tags() {
         if [ ! -e "$TOPDIR/$n" ];then mkdir -p "$TOPDIR/$n";fi
         printf "$results\n" | sort -V > "$t.raw"
     fi
+    if [[ -z ${SKIP_TAGS_REBUILD} ]];then
     rm -f "$t"
     ( for i in $(cat "$t.raw");do
         if is_skipped "$n:$i";then debug "Skipped: $n:$i";else printf "$i\n";fi
       done | awk '!seen[$0]++' | sort -V ) >> "$t"
+    fi
     set -e
     if [ -e "$t" ];then cat "$t";fi
 }
@@ -793,7 +800,7 @@ set_global_tags() {
 }
 
 record_build_image() {
-    # library/ubuntu/latest / mdillon/postgis/latest
+    # library/ubuntu/latest / corpusops/postgis/latest
     local image=$1
     # latest / latest
     local git_commit="${git_commit:-$(get_git_changeset "$W")}"
@@ -1009,6 +1016,7 @@ load_batched_images() {
     local counter=0
     local default_batchsize=$1
     shift
+    local batched_images="$(echo $@ |xargs -n1)"
     for i in $@;do
         local imgs=${i//::*}
         local batchsize=$default_batchsize
@@ -1021,7 +1029,7 @@ load_batched_images() {
             local subimages=$(do_list_image $img)
             if [[ -z $subimages ]];then break;fi
             for j in $subimages;do
-                if ! ( is_in_images $j );then
+                if ! ( is_in_images $j ) && ( echo "$batched_images" | egrep -q "^$j$");then
                     local space=" "
                     if [ `expr $counter % $batchsize` = 0 ];then
                         space=""
@@ -1091,9 +1099,8 @@ do_usage() {
 
 
 do_main() {
-    set_global_tags
     local args=${@:-usage}
-    local actions="refresh_corpusops|refresh_images|build|gen_travis|gen|list_images|clean_tags|get_namespace_tag|refresh_ancestors|refresh_pgrouting|make_tags|gen_gh"
+    local actions="make_tags|refresh_corpusops|refresh_images|build|gen_travis|gen_gh|gen|list_images|clean_tags|get_namespace_tag|gen_image|get_image_tags"
     actions="@($actions)"
     action=${1-};
     if [[ -n "$@" ]];then shift;fi
