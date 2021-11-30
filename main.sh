@@ -304,8 +304,6 @@ PGROUTING_MINOR_TAGS="
 9.6-2.5-2.6
 
 9.4-2.4-2.4
-9.4-2.4-2.5
-9.4-2.4-2.6
 9.5-2.4-2.4
 9.5-2.4-2.5
 9.5-2.4-2.6
@@ -313,7 +311,6 @@ PGROUTING_MINOR_TAGS="
 9.6-2.4-2.5
 9.6-2.4-2.6
 9.4-2.5-2.4
-9.4-2.5-2.5
 9.4-2.5-2.6
 9.5-2.5-2.4
 9.5-2.5-2.5
@@ -677,6 +674,9 @@ do_refresh_pgrouting() {
             -e 's!%%PGROUTING_DEBIAN_VERSION%%!'$pgrouting_debian_version'!g' \
             "$img/Dockerfile"
     done
+    rm -rf corpusops/pgrouting-bare/9.4-2.4-2.5
+    rm -rf corpusops/pgrouting-bare/9.4-2.4-2.6
+    rm -rf corpusops/pgrouting-bare/9.4-2.5-2.5
 }
 
 #  refresh_images $args: refresh images files
@@ -737,34 +737,31 @@ set_global_tag() {
 }
 
 set_global_tags() {
-    set_global_tag "corpusops/pgrouting-bare:11-2.5-2.6" "corpusops/pgrouting-bare"
-    for suffix in "";do
-        set_global_tag "corpusops/pgrouting-bare:13-3-3.1$suffix"     "corpusops/pgrouting-bare:13$suffix"
-        set_global_tag "corpusops/pgrouting-bare:13-3-3.1$suffix"     "corpusops/pgrouting-bare:13-3$suffix"
-        set_global_tag "corpusops/pgrouting-bare:12-3-3.1$suffix"     "corpusops/pgrouting-bare:12-3$suffix"
-        set_global_tag "corpusops/pgrouting-bare:12-3-3.1$suffix"     "corpusops/pgrouting-bare:12$suffix"
-        set_global_tag "corpusops/pgrouting-bare:11-3-3.1$suffix"     "corpusops/pgrouting-bare:11-3$suffix"
-        set_global_tag "corpusops/pgrouting-bare:12-2.5-2.6$suffix" "corpusops/pgrouting-bare:11-2.5$suffix"
-        set_global_tag "corpusops/pgrouting-bare:11-2.5-2.6$suffix" "corpusops/pgrouting-bare:11-2.5$suffix"
-        set_global_tag "corpusops/pgrouting-bare:10-2.5-2.6$suffix" "corpusops/pgrouting-bare:10-2.5$suffix"
-        set_global_tag "corpusops/pgrouting-bare:10-2.4-2.6$suffix" "corpusops/pgrouting-bare:10-2.4$suffix"
-        set_global_tag "corpusops/pgrouting-bare:11-2.5-2.6$suffix" "corpusops/pgrouting-bare:11$suffix"
-        set_global_tag "corpusops/pgrouting-bare:10-2.5-2.6$suffix" "corpusops/pgrouting-bare:10$suffix"
-        pgrouting9ver="2.5"
-        for i in 9.4 9.5 9.6;do
-            for j in 2.4 2.5;do
-                set_global_tag \
-                    "corpusops/pgrouting-bare:${i}-${j}-${pgrouting9ver}$suffix" \
-                    "corpusops/pgrouting-bare:${i}-${j}$suffix"
-            done
+    set_global_tag "corpusops/pgrouting-bare:11-2.5-2.6" "corpusops/pgrouting-bare:latest"
+    #
+	set_global_tag "corpusops/pgrouting-bare/9.6"        "corpusops/pgrouting-bare/9"
+    set_global_tag "corpusops/pgrouting-bare:10-2.5-2.6" "corpusops/pgrouting-bare:10"
+    set_global_tag "corpusops/pgrouting-bare:11-2.5-2.6" "corpusops/pgrouting-bare:11"
+    set_global_tag "corpusops/pgrouting-bare:12-3-3.1"   "corpusops/pgrouting-bare:12"
+    set_global_tag "corpusops/pgrouting-bare:13-3-3.1"   "corpusops/pgrouting-bare:13"
+    set_global_tag "corpusops/pgrouting-bare:10-2.4-2.6" "corpusops/pgrouting-bare:10-2.4"
+    set_global_tag "corpusops/pgrouting-bare:10-2.5-2.6" "corpusops/pgrouting-bare:10-2.5"
+    set_global_tag "corpusops/pgrouting-bare:11-2.5-2.6" "corpusops/pgrouting-bare:11-2.5"
+    set_global_tag "corpusops/pgrouting-bare:11-3-3.1"   "corpusops/pgrouting-bare:11-3"
+    set_global_tag "corpusops/pgrouting-bare:12-2.5-2.6" "corpusops/pgrouting-bare:11-2.5"
+    set_global_tag "corpusops/pgrouting-bare:12-3-3.1"   "corpusops/pgrouting-bare:12-3"
+    set_global_tag "corpusops/pgrouting-bare:13-3-3.1"   "corpusops/pgrouting-bare:13-3"
+    pgrouting9ver="2.5"
+    for i in 9.4 9.5 9.6;do
+        for j in 2.4 2.5;do
             set_global_tag \
-                "corpusops/pgrouting-bare:${i}-2.5-${pgrouting9ver}$suffix" \
-                "corpusops/pgrouting-bare:${i}$suffix"
-
+                "corpusops/pgrouting-bare:${i}-${j}-${pgrouting9ver}" \
+                "corpusops/pgrouting-bare:${i}-${j}"
         done
-		set_global_tag \
-			"corpusops/pgrouting-bare/9.6$suffix" \
-			"corpusops/pgrouting-bare/9$suffix"
+        set_global_tag \
+            "corpusops/pgrouting-bare:${i}-2.5-${pgrouting9ver}" \
+            "corpusops/pgrouting-bare:${i}"
+
     done
 }
 

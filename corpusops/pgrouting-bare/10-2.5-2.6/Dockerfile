@@ -68,6 +68,8 @@ RUN bash -euxc ': \
         bzip2 -ckd ../10.patch.bz2|patch -Np1; \
     fi'
 RUN bash -euxc ': \
+    && echo $PG_MAJOR > ~/.pg_supported_versions \
+    && cat ~/.pg_supported_versions \
     && cp debian/control debian/control.bak\
     && cp debian/rules   debian/rules.bak\
     && sed -i -r \
