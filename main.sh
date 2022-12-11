@@ -821,9 +821,6 @@ record_build_image() {
     local cmd="$cmd      echo \"${RED}$image/$df build: Failing after $retries retries${NORMAL}\" >&2"
     local cmd="$cmd      && false;fi"
     local run="echo -e \"${RED}$dbuild${NORMAL}\" && $cmd"
-    # for suffix in "" "-alpine";do
-    # rsync -azv --delete "corpusops/pgrouting-bare/11-2.5-2.6-alpine/" "corpusops/pgrouting-bare/alpine/"
-
     local release_tags="$itag"
     for alt_tag in ${duplicated_tags[$itag]};do
         release_tags="$release_tags $alt_tag"
@@ -1099,6 +1096,7 @@ do_usage() {
 
 
 do_main() {
+    set_global_tags
     local args=${@:-usage}
     local actions="make_tags|refresh_corpusops|refresh_images|build|gen_travis|gen_gh|gen|list_images|clean_tags|get_namespace_tag|gen_image|get_image_tags"
     actions="@($actions)"
