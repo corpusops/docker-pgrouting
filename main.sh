@@ -295,8 +295,8 @@ corpusops/pgrouting-bare/11-2.5-2.6\
  corpusops/pgrouting-bare/11-3-3.1::30
 corpusops/pgrouting-bare/10-2.4-2.4\
  corpusops/pgrouting-bare/10-2.4-2.5\
- corpusops/pgrouting-bare/10-2.4-2.6\
- corpusops/pgrouting-bare/10-2.5-2.4\
+ corpusops/pgrouting-bare/10-2.4-2.6::30
+corpusops/pgrouting-bare/10-2.5-2.4\
  corpusops/pgrouting-bare/10-2.5-2.5\
  corpusops/pgrouting-bare/10-2.5-2.6::30
 "
