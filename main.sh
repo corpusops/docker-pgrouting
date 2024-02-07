@@ -287,9 +287,9 @@ BATCHED_IMAGES="\
 corpusops/pgrouting-bare/15-3-3.4\
  corpusops/pgrouting-bare/14-3-3.4\
  corpusops/pgrouting-bare/13-3-3.4::30
-corpusops/pgrouting-bare/12-2.5-2.6\
- corpusops/pgrouting-bare/12-3-3.0\
- corpusops/pgrouting-bare/12-3-3.1::30
+corpusops/pgrouting-bare/12-2.5-2.6::30
+corpusops/pgrouting-bare/12-3-3.0::30
+corpusops/pgrouting-bare/12-3-3.1::30
 corpusops/pgrouting-bare/11-2.5-2.6\
  corpusops/pgrouting-bare/11-3-3.0\
  corpusops/pgrouting-bare/11-3-3.1::30
