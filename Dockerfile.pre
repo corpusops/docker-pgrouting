@@ -1,4 +1,4 @@
-ARG NONINTERACTIVE=y
+ARG NONINTERACTIVE=y DEBIAN_FRONTEND=noninteractive
 ADD \
     helpers/up.sh \
     helpers/add_gosu.sh \

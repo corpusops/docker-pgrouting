@@ -1,5 +1,5 @@
 FROM corpusops/postgis-bare:9.5-2.4 as builder
-ARG NONINTERACTIVE=y
+ARG NONINTERACTIVE=y DEBIAN_FRONTEND=noninteractive
 ADD \
     helpers/up.sh \
     helpers/add_gosu.sh \
