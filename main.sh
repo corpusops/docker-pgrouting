@@ -258,7 +258,7 @@ CURRENT_TS=$(date +%s)
 IMAGES_SKIP_NS="((mailhog|postgis|pgrouting(-bare)?|^library|dejavu|(minio/(minio|mc))))"
 
 SKIP_POSTGRES="postgres:(.*beta.*|.*alpine3.*|.*alpine.*|9\.[0-9]+\.[0-9]+.*|9\.0|8.*|1[09]\.[0-9].*)$"
-SKIPPED_TAGS="$SKIP_MISC|$SKIP_PRE|$SKIP_POSTGRES|:(9|10|11)\.|:.*alpine.*"
+SKIPPED_TAGS="$SKIP_MISC|$SKIP_PRE|$SKIP_POSTGRES|:(9|10|11)\.|:.*alpine.*|11-3-3.0"
 default_images="
 corpusops/pgrouting-bare
 "
@@ -287,12 +287,10 @@ BATCHED_IMAGES="\
 corpusops/pgrouting-bare/15-3-3.4\
  corpusops/pgrouting-bare/14-3-3.4\
  corpusops/pgrouting-bare/13-3-3.4::30
-corpusops/pgrouting-bare/12-2.5-2.6::30
-corpusops/pgrouting-bare/12-3-3.0::30
-corpusops/pgrouting-bare/12-3-3.1::30
-corpusops/pgrouting-bare/11-2.5-2.6\
- corpusops/pgrouting-bare/11-3-3.0\
- corpusops/pgrouting-bare/11-3-3.1::30
+corpusops/pgrouting-bare/12-3-3.0\
+ corpusops/pgrouting-bare/12-3-3.1::30
+corpusops/pgrouting-bare/12-2.5-2.6\
+ corpusops/pgrouting-bare/11-2.5-2.6::30
 corpusops/pgrouting-bare/10-2.4-2.4\
  corpusops/pgrouting-bare/10-2.4-2.5\
  corpusops/pgrouting-bare/10-2.4-2.6::30
@@ -323,8 +321,6 @@ PGROUTING_MINOR_TAGS="
 13-3-3.1
 12-3-3.1
 12-3-3.0
-11-3-3.1
-11-3-3.0
 11-2.5-2.6
 10-2.5-2.6
 9.6-2.5-2.6
@@ -746,9 +742,10 @@ do_refresh_pgrouting() {
         9.4-2.1-2.0 \
         9.6-2.3-2.3 \
         11-2.5-2.5 \
+        11-3* \
         1{3,4,5,6,7,8,9}-*-3.{0,1,2,3} \
     ;do
-        rm -rfv corpusops/pgrouting-bare/*$i*
+        rm -rf corpusops/pgrouting-bare/*$i*
     done
 }
 
@@ -773,6 +770,15 @@ do_refresh_images() {
     rsync -azv --delete local/docker-images/helpers/ helpers/
 
     do_refresh_pgrouting
+    while read images;do
+        for image in $images;do
+            if [[ -n $image ]];then
+                if ( echo "$image" | grep -E -vq "${PROTECTED_TAGS-}" ) || [[ -z ${PROTECTED_TAGS-} ]];then
+                    do_clean_tags $image
+                fi
+            fi
+        done
+    done <<< "$imagess"
 }
 
 char_occurence() {
@@ -921,8 +927,6 @@ do_build() {
             done
         done
     fi
-#echo $allcandidates|xargs -n1;exit 1
-
     for imagepart in $images_args;do
         if ( echo $imagepart|grep -q zleftover);then
             local candidates=""
