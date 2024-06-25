@@ -65,6 +65,14 @@ jobs:
       fail-fast: false
       matrix:
         IMAGES:$__IMAGES
+        #- "corpusops/test/a corpusops/test/b corpusops/test/c"
+        # all images that werent explicitly told to be built would be built in the next batches
+        # we span them onto N jobs
+        - "zleftover:1/5"
+        - "zleftover:2/5"
+        - "zleftover:3/5"
+        - "zleftover:4/5"
+        - "zleftover:5/5"
 on:
   push:
   workflow_dispatch:
