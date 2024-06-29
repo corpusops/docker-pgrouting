@@ -300,7 +300,6 @@ corpusops/pgrouting-bare/10-2.4-2.4\
  corpusops/pgrouting-bare/10-2.5-2.5\
  corpusops/pgrouting-bare/10-2.5-2.6::30
 "
-# 9.X is disabled to speedup rebuilds and obsolete now
 SKIP_REFRESH_ANCESTORS=${SKIP_REFRESH_ANCESTORS-}
 POSTGIS_MINOR_TAGS="
 9.0-2.1
@@ -321,6 +320,7 @@ PGROUTING_MINOR_TAGS="
 15-3-3.4
 14-3-3.4
 13-3-3.4
+13-3-3.1
 12-3-3.1
 12-3-3.0
 11-3-3.1
@@ -350,12 +350,6 @@ PGROUTING_MINOR_TAGS="
 12-2.5-2.6
 12-2.5-2.6
 "
-#for i in $PGROUTING_MINOR_TAGS;do
-#    t=corpusops/pgrouting-bare/$i
-#    if ! ( echo "$BATCHED_IMAGES" | grep -q $t );then
-#        BATCHED_IMAGES="$(printf "$BATCHED_IMAGES\n$t::2")"
-#    fi
-#done
 POSTGRES_MAJOR="9 10 11 12 13 14 15"
 packagesUrlJessie='http://apt-archive.postgresql.org/pub/repos/apt/dists/jessie-pgdg/main/binary-amd64/Packages'
 packagesJessie="local/$(echo "$packagesUrlJessie" | sed -r 's/[^a-zA-Z.-]+/-/g')"
@@ -568,7 +562,7 @@ is_skipped() {
 }
 
 skip_local() {
-    grep -E -v "(.\/)?local|\.git"
+    grep -E -v "(.\/)?local|\.git|docker-pgrouting|docker-postgis"
 }
 
 #  get_namespace_tag libary/foo/bar : get image tag with its final namespace
@@ -743,10 +737,19 @@ do_refresh_pgrouting() {
             -e 's!%%PGROUTING_DEBIAN_VERSION%%!'$pgrouting_debian_version'!g' \
             "$img/Dockerfile"
     done
-    rm -rf corpusops/pgrouting-bare/9.4-2.4-2.5
-    rm -rf corpusops/pgrouting-bare/9.4-2.4-2.6
-    rm -rf corpusops/pgrouting-bare/9.4-2.5-2.5
-    rm -rf corpusops/pgrouting-bare/11*2.5*2.5
+    for i in \
+        9.4-2.4-2.5 \
+        9.4-2.4-2.6 \
+        10.1-2.4-2.5 \
+        9.4-2.5-2.5 \
+        10.1-2.4-2.5 \
+        9.4-2.1-2.0 \
+        9.6-2.3-2.3 \
+        11-2.5-2.5 \
+        1{3,4,5,6,7,8,9}-*-3.{0,1,2,3} \
+    ;do
+        rm -rfv corpusops/pgrouting-bare/*$i*
+    done
 }
 
 #  refresh_images $args: refresh images files
@@ -918,6 +921,8 @@ do_build() {
             done
         done
     fi
+#echo $allcandidates|xargs -n1;exit 1
+
     for imagepart in $images_args;do
         if ( echo $imagepart|grep -q zleftover);then
             local candidates=""
