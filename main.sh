@@ -310,6 +310,8 @@ corpusops/pgrouting-bare/12-2.5-2.6\
  corpusops/pgrouting-bare/12-3-3.1\
  corpusops/pgrouting-bare/13-3-3.0\
  corpusops/pgrouting-bare/13-3-3.1::30
+corpusops/pgrouting-bare/14-3-3.0\
+ corpusops/pgrouting-bare/14-3-3.1::30
 "
 SKIP_REFRESH_ANCESTORS=${SKIP_REFRESH_ANCESTORS-}
 POSTGIS_MINOR_TAGS="
@@ -324,10 +326,10 @@ POSTGIS_MINOR_TAGS="
 11-2.5 11-3
 12-2.5 12-3
 13-3
+14-3
 "
 
 PGROUTING_MINOR_TAGS="
-
 13-3-3.1
 12-3-3.1
 11-3-3.1
@@ -359,6 +361,7 @@ PGROUTING_MINOR_TAGS="
 12-2.5-2.6
 11-3-3.0
 13-3-3.0
+14-3-3.0
 "
 # BATCHED_IMAGES="
 # "
@@ -368,11 +371,13 @@ PGROUTING_MINOR_TAGS="
 #         BATCHED_IMAGES="$(printf "$BATCHED_IMAGES\n$t::2")"
 #     fi
 # done
-POSTGRES_MAJOR="9 10 11 12 13"
-packagesUrlJessie='http://apt.postgresql.org/pub/repos/apt/dists/jessie-pgdg/main/binary-amd64/Packages'
+POSTGRES_MAJOR="9 10 11 12 13 14"
+packagesUrlJessie='http://apt-archive.postgresql.org/pub/repos/apt/dists/jessie-pgdg/main/binary-amd64/Packages'
 packagesJessie="local/$(echo "$packagesUrlJessie" | sed -r 's/[^a-zA-Z.-]+/-/g')"
-packagesUrlStretch='http://apt.postgresql.org/pub/repos/apt/dists/stretch-pgdg/main/binary-amd64/Packages'
+packagesUrlStretch='http://apt-archive.postgresql.org/pub/repos/apt/dists/stretch-pgdg/main/binary-amd64/Packages'
 packagesStretch="local/$(echo "$packagesUrlStretch" | sed -r 's/[^a-zA-Z.-]+/-/g')"
+packagesUrlBuster='http://apt.postgresql.org/pub/repos/apt/dists/buster-pgdg/main/binary-amd64/Packages'
+packagesBuster="local/$(echo "$packagesUrlBuster" | sed -r 's/[^a-zA-Z.-]+/-/g')"
 PGROUTING_REPO="${PGROUTING_REPO:-"https://salsa.debian.org/debian-gis-team/pgrouting.git"}"
 PGROUTING_UPSTREAM_REPO="${PGROUTING_UPSTREAM_REPO:-"https://github.com/pgRouting/pgrouting.git"}"
 
@@ -384,6 +389,8 @@ postgis_alpine_vers[2.3]="2.3.11"
 postgis_alpine_vers[2.3.11]="98b4bde783d6d2cda01ac268317ef83210370253f41c9dc937adeea2aa443dc3"
 postgis_alpine_vers[2.4]="2.4.9"
 postgis_alpine_vers[2.4.9]="77ba24bf8fbbfa65881d7d24bd6379f2001fff781d6ff512590bfaf16e605288"
+postgis_alpine_vers[2.5]="2.5.5"
+postgis_alpine_vers[2.5.5]="24b15ee36f3af02015da0e92a18f9046ea0b4fd24896196c8e6c2aa8e4b56baa"
 
 is_on_build() { echo "$@" | grep -E -iq "on.*build"; }
 slashcount() { local _slashcount="$(echo "${@}"|sed -e 's![^/]!!g')";echo ${#_slashcount}; }
@@ -767,7 +774,6 @@ do_refresh_images() {
     fi
     ( cd local/docker-images && git fetch --all && git reset --hard origin/master \
       && cp -rf helpers         rootfs packages ../..; )
-      # && cp -rf helpers Dock* rootfs packages ../..; )
     fi
     fi
     PGROUTING_URL="https://github.com/Starefossen/docker-pgrouting"

@@ -1,15 +1,37 @@
 FROM corpusops/postgis-bare:9.4-2.5 as builder
 ARG NONINTERACTIVE=y
-ADD helpers/ /tmp/copshelpers/
-RUN cd /tmp/copshelpers && ./up.sh \
-    && apt-get clean -y \
-    && rm -rf /var/lib/apt/lists/*
+ADD \
+    helpers/up.sh \
+    helpers/add_gosu.sh \
+    helpers/system_detect.sh \
+    helpers/add_frep.sh \
+    helpers/add_confd.sh \
+    helpers/add_dockerize.sh \
+    helpers/add_forego.sh \
+    helpers/add_opt_pkgs.sh \
+    helpers/add_remco.sh \
+    helpers/setup_locales.sh \
+    helpers/cops_pkgmgr_install.sh \
+    helpers/*_up.sh \
+    helpers/*_clean.sh \
+    rootfs/ \
+    packages/*packages*.txt \
+    ${EXTRA_FILES_LIST} \
+    /tmp/corpusopssteroidspgrouting/
+RUN cd /tmp/corpusopssteroidspgrouting \
+    && export PATH=$(pwd):$PATH \
+    && _cops_SYSTEM=$(./system_detect.sh) \
+    && cat ${_cops_SYSTEM}_optional_packages*.txt optional_packages*.txt > optional_packages.txt \
+    && cat ${_cops_SYSTEM}_packages*.txt > packages.txt \
+    && ./up.sh \
+    && ./${_cops_SYSTEM}_clean.sh
 MAINTAINER kiorky <kiorky@cryptelium.net>
 RUN bash -euxc ': \
-    && apt-get update -qq \
+    && apt-get update -qq \ 
+    && apt-get install -y --force-yes build-essential python-twisted-web || true \
     && apt-get install -y --force-yes build-essential cmake \
                devscripts equivs lsb-release \
-               dbconfig-common python-twisted-web daemon'
+               dbconfig-common daemon'
 RUN bash -euc ': \
     && apt-get install -y --force-yes \
         cmake                \
