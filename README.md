@@ -18,7 +18,8 @@
   The form is ``corpusops/pgrouting-bare:<POSTGIS_VER>-<POSTGIS_VER>-<PGROUTING_VER>``
     - [see tags](https://hub.docker.com/r/corpusops/pgrouting-bare/tags?page=1&ordering=last_updated)
     - Also:
-        - `corpusops/pgrouting-bare:13-3-3.1`   == `corpusops/pgrouting-bare:13`
+        - `corpusops/pgrouting-bare:14-3-3.1`   == `corpusops/pgrouting-bare:14`
+        - `corpusops/pgrouting-bare:15-3-3.1`   == `corpusops/pgrouting-bare:15`
         - `corpusops/pgrouting-bare:13-3-3.1`   == `corpusops/pgrouting-bare:13-3`
         - `corpusops/pgrouting-bare:12-3-3.1`   == `corpusops/pgrouting-bare:12-3`
         - `corpusops/pgrouting-bare:12-3-3.1`   == `corpusops/pgrouting-bare:12`

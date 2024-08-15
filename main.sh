@@ -253,13 +253,14 @@ SKIP_TF="(tensorflow.serving:[0-9].*)"
 SKIP_MINIO="(k8s-operator|((minio|mc):(RELEASE.)?[0-9]{4}-.{7}))"
 SKIP_MAILU="(mailu.*(feat|patch|merg|refactor|revert|upgrade|fix-|pr-template))"
 SKIP_DOCKER="docker(\/|:)([0-9]+\.[0-9]+\.|17|18.0[1-6]|1$|1(\.|-)).*"
-SKIPPED_TAGS="$SKIP_TF|$SKIP_MINOR_OS|$SKIP_NODE|$SKIP_DOCKER|$SKIP_MINIO|$SKIP_MAILU|$SKIP_MINOR|$SKIP_PRE|$SKIP_OS|$SKIP_PHP|$SKIP_WINDOWS|$SKIP_MISC"
+SKIPPED_TAGS="$SKIP_TF|$SKIP_MINOR_OS|$SKIP_NODE|$SKIP_DOCKER|$SKIP_MINIO|$SKIP_MAILU|$SKIP_MINOR_ES2|$SKIP_MINOR|$SKIP_PRE|$SKIP_OS|$SKIP_PHP|$SKIP_WINDOWS|$SKIP_MISC"
 CURRENT_TS=$(date +%s)
 IMAGES_SKIP_NS="((mailhog|postgis|pgrouting(-bare)?|^library|dejavu|(minio/(minio|mc))))"
 
-
+SKIP_POSTGRES="postgres:(.*beta.*|.*alpine3.*|.*alpine.*|9\.[0-9]+\.[0-9]+.*|9\.0|8.*|1[09]\.[0-9].*)$"
+SKIPPED_TAGS="$SKIP_MISC|$SKIP_PRE|$SKIP_POSTGRES|:(9|10|11)\.|:.*alpine.*"
 default_images="
-corpusops/pgrouting
+corpusops/pgrouting-bare
 "
 ONLY_ONE_MINOR="postgres|elasticsearch|nginx"
 PROTECTED_TAGS="corpusops/rsyslog"
@@ -281,38 +282,26 @@ find_top_node_() {
 find_top_node() { (set +e && find_top_node_ && set -e;); }
 NODE_TOP="$(echo $(find_top_node))"
 MAILU_VERSiON=1.7
-BATCHED_IMAGES="
-corpusops/pgrouting-bare/9.4-2.5-2.6\
- corpusops/pgrouting-bare/9.5-2.4-2.4\
- corpusops/pgrouting-bare/9.5-2.4-2.5\
- corpusops/pgrouting-bare/9.5-2.4-2.6\
- corpusops/pgrouting-bare/9.5-2.5-2.4\
- corpusops/pgrouting-bare/9.5-2.5-2.5\
- corpusops/pgrouting-bare/9.5-2.5-2.6::30
-corpusops/pgrouting-bare/9.6-2.4-2.4\
- corpusops/pgrouting-bare/9.6-2.4-2.5\
- corpusops/pgrouting-bare/9.6-2.4-2.6\
- corpusops/pgrouting-bare/9.6-2.5-2.4\
- corpusops/pgrouting-bare/9.6-2.5-2.5\
- corpusops/pgrouting-bare/9.6-2.5-2.6::30
+
+BATCHED_IMAGES="\
+corpusops/pgrouting-bare/15-3-3.4\
+ corpusops/pgrouting-bare/14-3-3.4\
+ corpusops/pgrouting-bare/13-3-3.4::30
+corpusops/pgrouting-bare/12-2.5-2.6\
+ corpusops/pgrouting-bare/12-3-3.0\
+ corpusops/pgrouting-bare/12-3-3.1::30
+corpusops/pgrouting-bare/11-2.5-2.5\
+ corpusops/pgrouting-bare/11-2.5-2.6\
+ corpusops/pgrouting-bare/11-3-3.0\
+ corpusops/pgrouting-bare/11-3-3.1::30
 corpusops/pgrouting-bare/10-2.4-2.4\
  corpusops/pgrouting-bare/10-2.4-2.5\
  corpusops/pgrouting-bare/10-2.4-2.6\
  corpusops/pgrouting-bare/10-2.5-2.4\
  corpusops/pgrouting-bare/10-2.5-2.5\
  corpusops/pgrouting-bare/10-2.5-2.6::30
-corpusops/pgrouting-bare/11-2.5-2.5\
- corpusops/pgrouting-bare/11-2.5-2.6\
- corpusops/pgrouting-bare/11-3-3.0\
- corpusops/pgrouting-bare/11-3-3.1::30
-corpusops/pgrouting-bare/12-2.5-2.6\
- corpusops/pgrouting-bare/12-3-3.0\
- corpusops/pgrouting-bare/12-3-3.1\
- corpusops/pgrouting-bare/13-3-3.0\
- corpusops/pgrouting-bare/13-3-3.1::30
-corpusops/pgrouting-bare/14-3-3.0\
- corpusops/pgrouting-bare/14-3-3.1::30
 "
+# 9.X is disabled to speedup rebuilds and obsolete now
 SKIP_REFRESH_ANCESTORS=${SKIP_REFRESH_ANCESTORS-}
 POSTGIS_MINOR_TAGS="
 9.0-2.1
@@ -324,16 +313,19 @@ POSTGIS_MINOR_TAGS="
 9.4-2.5 9.5-2.5 9.6-2.5
 10-2.4 10-2.5 10-3
 11-2.5 11-3
-12-2.5 12-3
+12-3
 13-3
 14-3
+15-3
 "
-
 PGROUTING_MINOR_TAGS="
-13-3-3.1
+15-3-3.4
+14-3-3.4
+13-3-3.4
 12-3-3.1
-11-3-3.1
 12-3-3.0
+11-3-3.1
+11-3-3.0
 11-2.5-2.6
 10-2.5-2.6
 9.6-2.5-2.6
@@ -359,25 +351,23 @@ PGROUTING_MINOR_TAGS="
 12-2.5-2.6
 12-2.5-2.6
 12-2.5-2.6
-11-3-3.0
-13-3-3.0
-14-3-3.0
 "
-# BATCHED_IMAGES="
-# "
-# for i in $PGROUTING_MINOR_TAGS;do
-#     t=corpusops/pgrouting-bare/$i
-#     if ! ( echo "$BATCHED_IMAGES" | grep -q $t );then
-#         BATCHED_IMAGES="$(printf "$BATCHED_IMAGES\n$t::2")"
-#     fi
-# done
-POSTGRES_MAJOR="9 10 11 12 13 14"
+#for i in $PGROUTING_MINOR_TAGS;do
+#    t=corpusops/pgrouting-bare/$i
+#    if ! ( echo "$BATCHED_IMAGES" | grep -q $t );then
+#        BATCHED_IMAGES="$(printf "$BATCHED_IMAGES\n$t::2")"
+#    fi
+#done
+POSTGRES_MAJOR="9 10 11 12 13 14 15"
 packagesUrlJessie='http://apt-archive.postgresql.org/pub/repos/apt/dists/jessie-pgdg/main/binary-amd64/Packages'
 packagesJessie="local/$(echo "$packagesUrlJessie" | sed -r 's/[^a-zA-Z.-]+/-/g')"
 packagesUrlStretch='http://apt-archive.postgresql.org/pub/repos/apt/dists/stretch-pgdg/main/binary-amd64/Packages'
 packagesStretch="local/$(echo "$packagesUrlStretch" | sed -r 's/[^a-zA-Z.-]+/-/g')"
 packagesUrlBuster='http://apt.postgresql.org/pub/repos/apt/dists/buster-pgdg/main/binary-amd64/Packages'
 packagesBuster="local/$(echo "$packagesUrlBuster" | sed -r 's/[^a-zA-Z.-]+/-/g')"
+packagesUrlBullseye='http://apt.postgresql.org/pub/repos/apt/dists/bullseye-pgdg/main/binary-amd64/Packages'
+packagesBullseye="local/$(echo "$packagesUrlBullseye" | sed -r 's/[^a-zA-Z.-]+/-/g')"
+
 PGROUTING_REPO="${PGROUTING_REPO:-"https://salsa.debian.org/debian-gis-team/pgrouting.git"}"
 PGROUTING_UPSTREAM_REPO="${PGROUTING_UPSTREAM_REPO:-"https://github.com/pgRouting/pgrouting.git"}"
 
@@ -578,11 +568,9 @@ is_skipped() {
     # fi
     return $ret
 }
-# echo $(set -x && is_skipped library/redis/3.0.4-32bit;echo $?)
-# exit 1
 
 skip_local() {
-    grep -E -v "(.\/)?local"
+    grep -E -v "(.\/)?local|\.git"
 }
 
 #  get_namespace_tag libary/foo/bar : get image tag with its final namespace
@@ -733,7 +721,7 @@ do_refresh_pgrouting() {
         pgrouting_debian_version="${tpgrouting_version}"
         pgrouting_version="${tpgrouting_version//*\//}"
         if [[ -z $pgrouting_debian_version ]];then
-            echo "No tag for $version"
+            echo "ERROR: No tag for $version"
             exit 1
         fi
         img="corpusops/pgrouting-bare/$version"
@@ -773,13 +761,14 @@ do_refresh_images() {
         git clone https://github.com/corpusops/docker-images local/docker-images
     fi
     ( cd local/docker-images && git fetch --all && git reset --hard origin/master \
-      && cp -rf helpers         rootfs packages ../..; )
+      && cp -rf helpers       rootfs packages ../..; )
     fi
     fi
     PGROUTING_URL="https://github.com/Starefossen/docker-pgrouting"
     if [ ! -e docker-pgrouting ];then git clone $PGROUTING_URL docker-pgrouting;fi
     ( cd docker-pgrouting && git fetch --all && git reset --hard origin/master; )
     cp -vf local/corpusops.bootstrap/bin/cops_pkgmgr_install.sh helpers/
+    rsync -azv --delete local/docker-images/helpers/ helpers/
 
     do_refresh_pgrouting
 }
@@ -833,8 +822,6 @@ set_global_tag() {
 }
 
 set_global_tags() {
-    set_global_tag "corpusops/pgrouting-bare:11-2.5-2.6" "corpusops/pgrouting-bare:latest"
-    #
 	set_global_tag "corpusops/pgrouting-bare/9.6"        "corpusops/pgrouting-bare/9"
     set_global_tag "corpusops/pgrouting-bare:10-2.5-2.6" "corpusops/pgrouting-bare:10"
     set_global_tag "corpusops/pgrouting-bare:11-2.5-2.6" "corpusops/pgrouting-bare:11"
@@ -846,18 +833,16 @@ set_global_tags() {
     set_global_tag "corpusops/pgrouting-bare:11-3-3.1"   "corpusops/pgrouting-bare:11-3"
     set_global_tag "corpusops/pgrouting-bare:12-2.5-2.6" "corpusops/pgrouting-bare:11-2.5"
     set_global_tag "corpusops/pgrouting-bare:12-3-3.1"   "corpusops/pgrouting-bare:12-3"
-    set_global_tag "corpusops/pgrouting-bare:13-3-3.1"   "corpusops/pgrouting-bare:13-3"
+    set_global_tag "corpusops/pgrouting-bare:13-3-3.4"   "corpusops/pgrouting-bare:13-3"
+    set_global_tag "corpusops/pgrouting-bare:14-3-3.4"   "corpusops/pgrouting-bare:14-3"
+    set_global_tag "corpusops/pgrouting-bare:15-3-3.4"   "corpusops/pgrouting-bare:15-3"
+    set_global_tag "corpusops/pgrouting-bare:15-3-3.4"   "corpusops/pgrouting-bare:latest"
     pgrouting9ver="2.5"
     for i in 9.4 9.5 9.6;do
         for j in 2.4 2.5;do
-            set_global_tag \
-                "corpusops/pgrouting-bare:${i}-${j}-${pgrouting9ver}" \
-                "corpusops/pgrouting-bare:${i}-${j}"
+            set_global_tag "corpusops/pgrouting-bare:${i}-${j}-${pgrouting9ver}" "corpusops/pgrouting-bare:${i}-${j}"
         done
-        set_global_tag \
-            "corpusops/pgrouting-bare:${i}-2.5-${pgrouting9ver}" \
-            "corpusops/pgrouting-bare:${i}"
-
+        set_global_tag "corpusops/pgrouting-bare:${i}-2.5-${pgrouting9ver}" "corpusops/pgrouting-bare:${i}"
     done
 }
 
