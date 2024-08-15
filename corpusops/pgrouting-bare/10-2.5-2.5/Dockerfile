@@ -17,17 +17,19 @@ ADD \
     rootfs/ \
     packages/*packages*.txt \
     ${EXTRA_FILES_LIST} \
-    /tmp/corpusopssteroidspgrouting/
-RUN cd /tmp/corpusopssteroidspgrouting \
+    /tmp/corpusopssteroids/
+RUN cd /tmp/corpusopssteroids \
     && export PATH=$(pwd):$PATH \
     && _cops_SYSTEM=$(./system_detect.sh) \
-    && cat ${_cops_SYSTEM}_optional_packages*.txt optional_packages*.txt > optional_packages.txt \
     && cat ${_cops_SYSTEM}_packages*.txt > packages.txt \
+    && cat ${_cops_SYSTEM}_optional_packages*.txt optional_packages*.txt > optional_packages.txt \
     && ./up.sh \
-    && ./${_cops_SYSTEM}_clean.sh
+    && apt-get clean -y \
+    && cd / && rm -rf /tmp/corpusopssteroids /var/cache/apk/* /var/lib/apt/lists/* \
+    && rm -rf /var/lib/apt/lists/*
 MAINTAINER kiorky <kiorky@cryptelium.net>
 RUN bash -euxc ': \
-    && apt-get update -qq \ 
+    && apt-get update -qq \
     && apt-get install -y --force-yes build-essential python-twisted-web || true \
     && apt-get install -y --force-yes build-essential cmake \
                devscripts equivs lsb-release \

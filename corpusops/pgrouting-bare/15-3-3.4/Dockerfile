@@ -1,4 +1,32 @@
-RFOM corpusops/postgis-bare:%%PG_MAJOR%%-%%POSTGIS_MAJOR%% as builder
+FROM corpusops/postgis-bare:15-3 as builder
+ARG NONINTERACTIVE=y
+ADD \
+    helpers/up.sh \
+    helpers/add_gosu.sh \
+    helpers/system_detect.sh \
+    helpers/add_frep.sh \
+    helpers/add_confd.sh \
+    helpers/add_dockerize.sh \
+    helpers/add_forego.sh \
+    helpers/add_opt_pkgs.sh \
+    helpers/add_remco.sh \
+    helpers/setup_locales.sh \
+    helpers/cops_pkgmgr_install.sh \
+    helpers/*_up.sh \
+    helpers/*_clean.sh \
+    rootfs/ \
+    packages/*packages*.txt \
+    ${EXTRA_FILES_LIST} \
+    /tmp/corpusopssteroids/
+RUN cd /tmp/corpusopssteroids \
+    && export PATH=$(pwd):$PATH \
+    && _cops_SYSTEM=$(./system_detect.sh) \
+    && cat ${_cops_SYSTEM}_packages*.txt > packages.txt \
+    && cat ${_cops_SYSTEM}_optional_packages*.txt optional_packages*.txt > optional_packages.txt \
+    && ./up.sh \
+    && apt-get clean -y \
+    && cd / && rm -rf /tmp/corpusopssteroids /var/cache/apk/* /var/lib/apt/lists/* \
+    && rm -rf /var/lib/apt/lists/*
 MAINTAINER kiorky <kiorky@cryptelium.net>
 RUN bash -euxc ': \
     && apt-get update -qq \
@@ -28,8 +56,8 @@ RUN bash -euc ': \
 #     && python  -m pip install "sphinx>1.8" \
 #     && python3 -m pip install "sphinx>1.8" \
 #     '
-ENV PGROUTING_REPO=%%PGROUTING_REPO%%
-ENV PGROUTING_UPSTREAM_REPO=%%PGROUTING_UPSTREAM_REPO%%
+ENV PGROUTING_REPO=https://salsa.debian.org/debian-gis-team/pgrouting.git
+ENV PGROUTING_UPSTREAM_REPO=https://github.com/pgRouting/pgrouting.git
 RUN bash -euxc ': \
     && apt-get install -y --force-yes \
         git                  \
@@ -39,13 +67,13 @@ RUN bash -euxc ': \
     && git remote add pgrouting $PGROUTING_UPSTREAM_REPO \
     && git fetch pgrouting \
     '
-ENV PG_MAJOR=%%PG_MAJOR%%
-ENV POSTGRES_MAJOR=%%PG_MAJOR%%
-ENV POSTGIS_MAJOR=%%POSTGIS_MAJOR%%
-ENV PGROUTING_MAJOR=%%PGROUTING_MAJOR%%
-ENV PGROUTING_VERSION=%%PGROUTING_VERSION%%
-ENV PGROUTING_DEBIAN_VERSION=%%PGROUTING_DEBIAN_VERSION%%
-ENV PGROUTING_UPSTREAM_VERSION=%%PGROUTING_UPSTREAM_VERSION%%
+ENV PG_MAJOR=15
+ENV POSTGRES_MAJOR=15
+ENV POSTGIS_MAJOR=3
+ENV PGROUTING_MAJOR=3.4
+ENV PGROUTING_VERSION=3.4.2-1
+ENV PGROUTING_DEBIAN_VERSION=debian/3.4.2-1
+ENV PGROUTING_UPSTREAM_VERSION=v3.4.2
 ARG MAKEOPTS=-j4
 WORKDIR /usr/src/pgrouting
 ADD *.patch.* ../
@@ -90,10 +118,10 @@ RUN bash -euxc ': \
 RUN mk-build-deps -t "apt-get --no-install-recommends -y --force-yes -o Debug::pkgProblemResolver=yes" -ir debian/control
 RUN debuild -i -us -uc -b
 
-FROM corpusops/postgis-bare:%%PG_MAJOR%%-%%POSTGIS_MAJOR%%
+FROM corpusops/postgis-bare:15-3
 MAINTAINER kiorky <kiorky@cryptelium.net>
-ENV PGROUTING_MAJOR %%PGROUTING_MAJOR%%
-ENV PGROUTING_VERSION %%PGROUTING_VERSION%%
+ENV PGROUTING_MAJOR 3.4
+ENV PGROUTING_VERSION 3.4.2-1
 COPY --from=builder /usr/src/*deb /tmp/
 COPY ./initdb-pgrouting.sh /docker-entrypoint-initdb.d/routing.sh
 RUN bash -euxc ': \
@@ -103,3 +131,5 @@ RUN bash -euxc ': \
         $( ls /tmp/postgresql-$PG_MAJOR-pgrouting*deb -1 | grep -v dbg ) \
     && mkdir -p /docker-entrypoint-initdb.d \
     && rm -rvf /var/lib/apt/lists/* /tmp/*deb'
+LABEL com.github.corpusops.docker-images-commit="$DOCKER_IMAGES_COMMIT"
+ARG DOCKER_IMAGES_COMMIT=master

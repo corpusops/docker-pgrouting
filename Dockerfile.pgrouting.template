@@ -1,4 +1,4 @@
-RFOM corpusops/postgis-bare:%%PG_MAJOR%%-%%POSTGIS_MAJOR%% as builder
+FROM corpusops/postgis-bare:%%PG_MAJOR%%-%%POSTGIS_MAJOR%% as builder
 MAINTAINER kiorky <kiorky@cryptelium.net>
 RUN bash -euxc ': \
     && apt-get update -qq \

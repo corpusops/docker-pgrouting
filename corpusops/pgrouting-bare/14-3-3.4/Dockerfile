@@ -17,17 +17,19 @@ ADD \
     rootfs/ \
     packages/*packages*.txt \
     ${EXTRA_FILES_LIST} \
-    /tmp/corpusopssteroidspgrouting/
-RUN cd /tmp/corpusopssteroidspgrouting \
+    /tmp/corpusopssteroids/
+RUN cd /tmp/corpusopssteroids \
     && export PATH=$(pwd):$PATH \
     && _cops_SYSTEM=$(./system_detect.sh) \
-    && cat ${_cops_SYSTEM}_optional_packages*.txt optional_packages*.txt > optional_packages.txt \
     && cat ${_cops_SYSTEM}_packages*.txt > packages.txt \
+    && cat ${_cops_SYSTEM}_optional_packages*.txt optional_packages*.txt > optional_packages.txt \
     && ./up.sh \
-    && ./${_cops_SYSTEM}_clean.sh
+    && apt-get clean -y \
+    && cd / && rm -rf /tmp/corpusopssteroids /var/cache/apk/* /var/lib/apt/lists/* \
+    && rm -rf /var/lib/apt/lists/*
 MAINTAINER kiorky <kiorky@cryptelium.net>
 RUN bash -euxc ': \
-    && apt-get update -qq \ 
+    && apt-get update -qq \
     && apt-get install -y --force-yes build-essential python-twisted-web || true \
     && apt-get install -y --force-yes build-essential cmake \
                devscripts equivs lsb-release \
@@ -68,10 +70,10 @@ RUN bash -euxc ': \
 ENV PG_MAJOR=14
 ENV POSTGRES_MAJOR=14
 ENV POSTGIS_MAJOR=3
-ENV PGROUTING_MAJOR=3.0
-ENV PGROUTING_VERSION=3.0.2-1
-ENV PGROUTING_DEBIAN_VERSION=debian/3.0.2-1
-ENV PGROUTING_UPSTREAM_VERSION=v3.0.6
+ENV PGROUTING_MAJOR=3.4
+ENV PGROUTING_VERSION=3.4.2-1
+ENV PGROUTING_DEBIAN_VERSION=debian/3.4.2-1
+ENV PGROUTING_UPSTREAM_VERSION=v3.4.2
 ARG MAKEOPTS=-j4
 WORKDIR /usr/src/pgrouting
 ADD *.patch.* ../
@@ -118,8 +120,8 @@ RUN debuild -i -us -uc -b
 
 FROM corpusops/postgis-bare:14-3
 MAINTAINER kiorky <kiorky@cryptelium.net>
-ENV PGROUTING_MAJOR 3.0
-ENV PGROUTING_VERSION 3.0.2-1
+ENV PGROUTING_MAJOR 3.4
+ENV PGROUTING_VERSION 3.4.2-1
 COPY --from=builder /usr/src/*deb /tmp/
 COPY ./initdb-pgrouting.sh /docker-entrypoint-initdb.d/routing.sh
 RUN bash -euxc ': \
