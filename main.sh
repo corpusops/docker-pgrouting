@@ -284,7 +284,8 @@ NODE_TOP="$(echo $(find_top_node))"
 MAILU_VERSiON=1.7
 
 BATCHED_IMAGES="\
-corpusops/pgrouting-bare/15-3-3.4\
+corpusops/pgrouting-bare/16-3-3.4\
+ corpusops/pgrouting-bare/15-3-3.4\
  corpusops/pgrouting-bare/14-3-3.4\
  corpusops/pgrouting-bare/13-3-3.4::30
 corpusops/pgrouting-bare/12-3-3.0\
@@ -313,8 +314,10 @@ POSTGIS_MINOR_TAGS="
 13-3
 14-3
 15-3
+16-3
 "
 PGROUTING_MINOR_TAGS="
+16-3-3.4
 15-3-3.4
 14-3-3.4
 13-3-3.4
@@ -346,7 +349,7 @@ PGROUTING_MINOR_TAGS="
 12-2.5-2.6
 12-2.5-2.6
 "
-POSTGRES_MAJOR="9 10 11 12 13 14 15"
+POSTGRES_MAJOR="9 10 11 12 13 14 15 16"
 packagesUrlJessie='http://apt-archive.postgresql.org/pub/repos/apt/dists/jessie-pgdg/main/binary-amd64/Packages'
 packagesJessie="local/$(echo "$packagesUrlJessie" | sed -r 's/[^a-zA-Z.-]+/-/g')"
 packagesUrlStretch='http://apt-archive.postgresql.org/pub/repos/apt/dists/stretch-pgdg/main/binary-amd64/Packages'
@@ -843,7 +846,8 @@ set_global_tags() {
     set_global_tag "corpusops/pgrouting-bare:13-3-3.4"   "corpusops/pgrouting-bare:13-3"
     set_global_tag "corpusops/pgrouting-bare:14-3-3.4"   "corpusops/pgrouting-bare:14-3"
     set_global_tag "corpusops/pgrouting-bare:15-3-3.4"   "corpusops/pgrouting-bare:15-3"
-    set_global_tag "corpusops/pgrouting-bare:15-3-3.4"   "corpusops/pgrouting-bare:latest"
+    set_global_tag "corpusops/pgrouting-bare:16-3-3.4"   "corpusops/pgrouting-bare:16-3"
+    set_global_tag "corpusops/pgrouting-bare:16-3-3.4"   "corpusops/pgrouting-bare:latest"
     pgrouting9ver="2.5"
     for i in 9.4 9.5 9.6;do
         for j in 2.4 2.5;do
