@@ -548,7 +548,7 @@ gen_image() {
         if [ -e "$df" ];then dockerfiles="$dockerfiles $df" && break;fi
     done
     local parts=""
-    for partsstep in squashpre from args argspost helpers pre base post postextra clean cleanpost squash extra labels labelspost;do
+    for partsstep in squashpre from args argspost helpers pre base post postextra clean cleanpost predosquash squash squashpreexec squashexec postdosquash extra labels labelspost;do
         parts="$parts pre_${partsstep} ${partsstep} post_${partsstep}"
     done
     parts=$(echo "$parts"|xargs)
@@ -746,6 +746,7 @@ do_refresh_pgrouting() {
             && cat Dockerfile.pre \
             && grep -E -v "FROM.*builder" "$img/Dockerfile" \
             && cat Dockerfile.squash \
+            && cat Dockerfile.squashexec \
             && cat Dockerfile.post)"
         echo "$dockerfile" > "$img/Dockerfile"
         sed -i -r \
@@ -1182,7 +1183,6 @@ do_usage() {
 
 
 do_main() {
-    set_global_tags
     local args=${@:-usage}
     local actions="make_tags|refresh_corpusops|refresh_images|build|gen_travis|gen_gh|gen|list_images|clean_tags|get_namespace_tag|gen_image|get_image_tags"
     actions="@($actions)"
