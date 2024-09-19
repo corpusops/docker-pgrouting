@@ -1,4 +1,4 @@
-FROM corpusops/postgis-bare:%%PG_MAJOR%%-%%POSTGIS_MAJOR%% as builder
+FROM corpusops/postgis-bare:%%PG_MAJOR%%-%%POSTGIS_MAJOR%% AS builder
 MAINTAINER kiorky <kiorky@cryptelium.net>
 RUN bash -euxc ': \
     && apt-get update -qq \
@@ -90,7 +90,7 @@ RUN bash -euxc ': \
 RUN mk-build-deps -t "apt-get --no-install-recommends -y --force-yes -o Debug::pkgProblemResolver=yes" -ir debian/control
 RUN debuild -i -us -uc -b
 
-FROM corpusops/postgis-bare:%%PG_MAJOR%%-%%POSTGIS_MAJOR%%
+FROM corpusops/postgis-bare:%%PG_MAJOR%%-%%POSTGIS_MAJOR%% AS final
 MAINTAINER kiorky <kiorky@cryptelium.net>
 ENV PGROUTING_MAJOR %%PGROUTING_MAJOR%%
 ENV PGROUTING_VERSION %%PGROUTING_VERSION%%

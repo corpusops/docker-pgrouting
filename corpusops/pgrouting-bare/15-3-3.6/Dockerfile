@@ -1,4 +1,6 @@
-FROM corpusops/postgis-bare:9.6-2.5 as builder
+ARG ANCESTOR=corpusops/postgis-bare:15-3
+ARG RSYNC=corpusops/rsync
+FROM corpusops/postgis-bare:15-3 AS builder
 ARG NONINTERACTIVE=y DEBIAN_FRONTEND=noninteractive
 ADD \
     helpers/up.sh \
@@ -67,13 +69,13 @@ RUN bash -euxc ': \
     && git remote add pgrouting $PGROUTING_UPSTREAM_REPO \
     && git fetch pgrouting \
     '
-ENV PG_MAJOR=9.6
-ENV POSTGRES_MAJOR=9.6
-ENV POSTGIS_MAJOR=2.5
-ENV PGROUTING_MAJOR=2.4
-ENV PGROUTING_VERSION=2.4.2-1
-ENV PGROUTING_DEBIAN_VERSION=debian/2.4.2-1
-ENV PGROUTING_UPSTREAM_VERSION=v2.4.2
+ENV PG_MAJOR=15
+ENV POSTGRES_MAJOR=15
+ENV POSTGIS_MAJOR=3
+ENV PGROUTING_MAJOR=3.6
+ENV PGROUTING_VERSION=3.6.2-2_exp1
+ENV PGROUTING_DEBIAN_VERSION=debian/3.6.2-2_exp1
+ENV PGROUTING_UPSTREAM_VERSION=v3.6.2
 ARG MAKEOPTS=-j4
 WORKDIR /usr/src/pgrouting
 ADD *.patch.* ../
@@ -118,10 +120,10 @@ RUN bash -euxc ': \
 RUN mk-build-deps -t "apt-get --no-install-recommends -y --force-yes -o Debug::pkgProblemResolver=yes" -ir debian/control
 RUN debuild -i -us -uc -b
 
-FROM corpusops/postgis-bare:9.6-2.5
+FROM corpusops/postgis-bare:15-3 AS final
 MAINTAINER kiorky <kiorky@cryptelium.net>
-ENV PGROUTING_MAJOR 2.4
-ENV PGROUTING_VERSION 2.4.2-1
+ENV PGROUTING_MAJOR 3.6
+ENV PGROUTING_VERSION 3.6.2-2_exp1
 COPY --from=builder /usr/src/*deb /tmp/
 COPY ./initdb-pgrouting.sh /docker-entrypoint-initdb.d/routing.sh
 RUN bash -euxc ': \
@@ -131,5 +133,26 @@ RUN bash -euxc ': \
         $( ls /tmp/postgresql-$PG_MAJOR-pgrouting*deb -1 | grep -v dbg ) \
     && mkdir -p /docker-entrypoint-initdb.d \
     && rm -rvf /var/lib/apt/lists/* /tmp/*deb'
-LABEL com.github.corpusops.docker-images-commit="$DOCKER_IMAGES_COMMIT"
+FROM $RSYNC AS squashed-rsync
+FROM $ANCESTOR AS squashed-ancestor
+ARG ROOTFS="/BASE_ROOTFS_TO_COPY_THAT_WONT_COLLIDE_1234567890"
+ARG PATH="${ROOTFS}_rsync/bin:$PATH"
+SHELL ["busybox",  "sh", "-c"]
+RUN --mount=type=bind,from=final,target=$ROOTFS --mount=type=bind,from=squashed-rsync,target=${ROOTFS}_rsync \
+rsync -Aaz --delete ${ROOTFS}/ / --exclude=/proc --exclude=/sys --exclude=/etc/resolv.conf --exclude=/etc/hosts --exclude=$ROOTFS* --exclude=dev/shm --exclude=dev/pts --exclude=dev/mqueue
+SHELL ["/bin/sh", "-c"]
 ARG DOCKER_IMAGES_COMMIT=master
+LABEL com.github.corpusops.docker-images-commit="$DOCKER_IMAGES_COMMIT"
+MAINTAINER kiorky <kiorky@cryptelium.net>
+ENV PGROUTING_REPO=https://salsa.debian.org/debian-gis-team/pgrouting.git
+ENV PGROUTING_UPSTREAM_REPO=https://github.com/pgRouting/pgrouting.git
+ENV PG_MAJOR=15
+ENV POSTGRES_MAJOR=15
+ENV POSTGIS_MAJOR=3
+ENV PGROUTING_MAJOR=3.6
+ENV PGROUTING_VERSION=3.6.2-2_exp1
+ENV PGROUTING_DEBIAN_VERSION=debian/3.6.2-2_exp1
+ENV PGROUTING_UPSTREAM_VERSION=v3.6.2
+MAINTAINER kiorky <kiorky@cryptelium.net>
+ENV PGROUTING_MAJOR 3.6
+ENV PGROUTING_VERSION 3.6.2-2_exp1

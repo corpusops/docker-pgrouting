@@ -26,6 +26,10 @@ NORMAL="\\e[0;0m"
 NO_COLOR=${NO_COLORS-${NO_COLORS-${NOCOLOR-${NOCOLORS-}}}}
 LOGGER_NAME=${LOGGER_NAME:-corpusops_build}
 ERROR_MSG="There were errors"
+ver_ge() { [  "$2" = "`echo -e "$1\n$2" | sort -V | head -n1`" ]; }
+ver_gt() { [ "$1" = "$2" ] && return 1 || ver_ge $1 $2; }
+ver_le() { [  "$1" = "`echo -e "$1\n$2" | sort -V | head -n1`" ]; }
+ver_lt() { [ "$1" = "$2" ] && return 1 || ver_le $1 $2; }
 uniquify_string() {
     local pattern=$1
     shift
@@ -238,7 +242,6 @@ SKIP_OS="$SKIP_OS|((debian|redis):[0-9]+\.[0-9]+.*)"
 SKIP_OS="$SKIP_OS|(centos:.\..\.....|centos.\..\.....)"
 SKIP_OS="$SKIP_OS|(alpine:.\.[0-9]+\.[0-9]+)"
 SKIP_OS="$SKIP_OS|(debian:(6.*|squeeze))"
-SKIP_OS="$SKIP_OS|(ubuntu:(([0-9][0-9]\.[0-9][0-9]\..*)|(14.10|12|10|11|13|15)))"
 SKIP_OS="$SKIP_OS|(lucid|maverick|natty|precise|quantal|raring|saucy)"
 SKIP_OS="$SKIP_OS|(centos:(centos)?5)"
 SKIP_OS="$SKIP_OS|(fedora.*(modular|21))"
@@ -253,7 +256,7 @@ SKIP_TF="(tensorflow.serving:[0-9].*)"
 SKIP_MINIO="(k8s-operator|((minio|mc):(RELEASE.)?[0-9]{4}-.{7}))"
 SKIP_MAILU="(mailu.*(feat|patch|merg|refactor|revert|upgrade|fix-|pr-template))"
 SKIP_DOCKER="docker(\/|:)([0-9]+\.[0-9]+\.|17|18.0[1-6]|1$|1(\.|-)).*"
-SKIPPED_TAGS="$SKIP_TF|$SKIP_MINOR_OS|$SKIP_NODE|$SKIP_DOCKER|$SKIP_MINIO|$SKIP_MAILU|$SKIP_MINOR_ES2|$SKIP_MINOR|$SKIP_PRE|$SKIP_OS|$SKIP_PHP|$SKIP_WINDOWS|$SKIP_MISC"
+SKIPPED_TAGS="$SKIP_TF|$SKIP_MINOR_OS|$SKIP_NODE|$SKIP_DOCKER|$SKIP_MINIO|$SKIP_MAILU|$SKIP_MINOR|$SKIP_PRE|$SKIP_OS|$SKIP_PHP|$SKIP_WINDOWS|$SKIP_MISC"
 CURRENT_TS=$(date +%s)
 IMAGES_SKIP_NS="((mailhog|postgis|pgrouting(-bare)?|^library|dejavu|(minio/(minio|mc))))"
 
@@ -283,24 +286,30 @@ find_top_node() { (set +e && find_top_node_ && set -e;); }
 NODE_TOP="$(echo $(find_top_node))"
 MAILU_VERSiON=1.7
 
-BATCHED_IMAGES="\
-corpusops/pgrouting-bare/16-3-3.4\
- corpusops/pgrouting-bare/15-3-3.4\
- corpusops/pgrouting-bare/14-3-3.4\
- corpusops/pgrouting-bare/13-3-3.4::30
-corpusops/pgrouting-bare/12-3-3.0\
- corpusops/pgrouting-bare/12-3-3.1::30
-corpusops/pgrouting-bare/12-2.5-2.6\
- corpusops/pgrouting-bare/11-2.5-2.6::30
+UNSUPPORTED_BATCHED_IMAGES="\
 corpusops/pgrouting-bare/10-2.4-2.4\
  corpusops/pgrouting-bare/10-2.4-2.5\
  corpusops/pgrouting-bare/10-2.4-2.6::30
 corpusops/pgrouting-bare/10-2.5-2.4\
  corpusops/pgrouting-bare/10-2.5-2.5\
  corpusops/pgrouting-bare/10-2.5-2.6::30
+ corpusops/pgrouting-bare/11-2.5-2.6::30
+"
+BATCHED_IMAGES="\
+corpusops/pgrouting-bare/16-3-3.6\
+ corpusops/pgrouting-bare/16-3-3.5\
+ corpusops/pgrouting-bare/16-3-3.4::30
+corpusops/pgrouting-bare/15-3-3.6\
+ corpusops/pgrouting-bare/15-3-3.5\
+ corpusops/pgrouting-bare/15-3-3.4::30
+corpusops/pgrouting-bare/14-3-3.4\
+ corpusops/pgrouting-bare/13-3-3.4::30
+corpusops/pgrouting-bare/12-3-3.0\
+ corpusops/pgrouting-bare/12-3-3.1\
+ corpusops/pgrouting-bare/12-2.5-2.6::30
 "
 SKIP_REFRESH_ANCESTORS=${SKIP_REFRESH_ANCESTORS-}
-POSTGIS_MINOR_TAGS="
+UNSUPPORTED_POSTGIS_MINOR_TAGS="
 9.0-2.1
 9.1-2.2
 9.2-2.2 9.2-2.3
@@ -310,24 +319,17 @@ POSTGIS_MINOR_TAGS="
 9.4-2.5 9.5-2.5 9.6-2.5
 10-2.4 10-2.5 10-3
 11-2.5 11-3
+"
+POSTGIS_MINOR_TAGS="
 12-3
 13-3
 14-3
 15-3
 16-3
 "
-PGROUTING_MINOR_TAGS="
-16-3-3.4
-15-3-3.4
-14-3-3.4
-13-3-3.4
-13-3-3.1
-12-3-3.1
-12-3-3.0
-11-2.5-2.6
+UNSUPPORTED_PGROUTING_MINOR_TAGS="
 10-2.5-2.6
 9.6-2.5-2.6
-
 9.5-2.4-2.4
 9.5-2.4-2.5
 9.5-2.4-2.6
@@ -345,11 +347,27 @@ PGROUTING_MINOR_TAGS="
 10-2.4-2.6
 10-2.5-2.4
 10-2.5-2.5
+11-2.5-2.6
+"
+PGROUTING_MINOR_TAGS="
+16-3-3.6
+15-3-3.6
+16-3-3.5
+15-3-3.5
+16-3-3.4
+15-3-3.4
+14-3-3.4
+13-3-3.4
+13-3-3.1
+12-3-3.1
+12-3-3.0
+
 12-2.5-2.6
 12-2.5-2.6
 12-2.5-2.6
 "
-POSTGRES_MAJOR="9 10 11 12 13 14 15 16"
+UNSUPPORTED_POSTGRES_MAJOR="9 10 11"
+POSTGRES_MAJOR="12 13 14 15 16"
 packagesUrlJessie='http://apt-archive.postgresql.org/pub/repos/apt/dists/jessie-pgdg/main/binary-amd64/Packages'
 packagesJessie="local/$(echo "$packagesUrlJessie" | sed -r 's/[^a-zA-Z.-]+/-/g')"
 packagesUrlStretch='http://apt-archive.postgresql.org/pub/repos/apt/dists/stretch-pgdg/main/binary-amd64/Packages'
@@ -529,7 +547,11 @@ gen_image() {
         local df="$folder/Dockerfile.override"
         if [ -e "$df" ];then dockerfiles="$dockerfiles $df" && break;fi
     done
-    local parts="from args argspost helpers pre base post clean cleanpost extra labels labelspost"
+    local parts=""
+    for partsstep in squashpre from args argspost helpers pre base post postextra clean cleanpost squash extra labels labelspost;do
+        parts="$parts pre_${partsstep} ${partsstep} post_${partsstep}"
+    done
+    parts=$(echo "$parts"|xargs)
     for order in $parts;do
         for folder in . .. ../../..;do
             local df="$folder/Dockerfile.$order"
@@ -591,7 +613,6 @@ do_get_namespace_tag() {
     done
 }
 
-
 filter_tags() {
     for j in $@ ;do for i in $j;do
         if is_skipped "$n:$i";then debug "Skipped: $n:$i";else printf "$i\n";fi
@@ -634,8 +655,8 @@ get_image_tags() {
                 if ! ( echo "$atags" | grep -E -q "^$ix\.${j}\." );then continue;fi
                 for flavor in "" \
                     alpine alpine3.13 alpine3.14 alpine3.15 alpine3.16 alpine3.5 \
-                    trusty xenial bionic focal jammy \
-                    bullseye stretch buster jessie \
+                    trusty xenial bionic focal jammy noble \
+                    bookworm bullseye stretch buster jessie \
                     ;do
                     selected=""
                     if [[ -z "$flavor" ]];then
@@ -718,10 +739,13 @@ do_refresh_pgrouting() {
         img="corpusops/pgrouting-bare/$version"
         for j in $img;do if [ ! -e "$j" ];then mkdir -p "$j";fi;done
         cp -vf Dockerfile.pgrouting.template "$img/Dockerfile"
+        ancestor=$(grep -E "FROM.*builder" "$img/Dockerfile"|head -n1|awk '{print $2}')
         dockerfile="$(: \
+            && cat Dockerfile.squashpre | sed -re "s/ANCESTOR=.*/ANCESTOR=${ancestor//\//\\\/}/g" \
             && grep -E    "FROM.*builder" "$img/Dockerfile" \
             && cat Dockerfile.pre \
             && grep -E -v "FROM.*builder" "$img/Dockerfile" \
+            && cat Dockerfile.squash \
             && cat Dockerfile.post)"
         echo "$dockerfile" > "$img/Dockerfile"
         sed -i -r \
@@ -735,6 +759,7 @@ do_refresh_pgrouting() {
             -e 's!%%PGROUTING_UPSTREAM_VERSION%%!'$pgrouting_upstream_version'!g' \
             -e 's!%%PGROUTING_DEBIAN_VERSION%%!'$pgrouting_debian_version'!g' \
             "$img/Dockerfile"
+        cat "$img/Dockerfile" | egrep -E "^(MAINTAINER|ENV)" >> "$img/Dockerfile"
     done
     for i in \
         9.4-2.4-2.5 \
@@ -757,13 +782,14 @@ do_refresh_pgrouting() {
 #     refresh_images library/ubuntu: only refresh ubuntu images
 do_refresh_images() {
     local imagess="${@:-$default_images}"
+    cp -vf local/corpusops.bootstrap/bin/cops_pkgmgr_install.sh helpers/
     if [[ -z ${SKIP_REFRESH_COPS-} ]];then
     if ! ( grep -q corpusops/docker-images .git/config );then
     if [ ! -e local/docker-images ];then
         git clone https://github.com/corpusops/docker-images local/docker-images
     fi
     ( cd local/docker-images && git fetch --all && git reset --hard origin/master \
-      && cp -rf helpers       rootfs packages ../..; )
+      && cp -rf helpers Dockerfile.*squash* rootfs packages ../..; )
     fi
     fi
     PGROUTING_URL="https://github.com/Starefossen/docker-pgrouting"
@@ -807,20 +833,20 @@ is_same_commit_label() {
     return $ret
 }
 
-get_docker_squash_args() {
-    DOCKER_DO_SQUASH=${DOCKER_DO_SQUASH-init}
-    if ! ( echo "${NO_SQUASH-}"|grep -E -q "^(no)?$" );then
-        DOCKER_DO_SQUASH=""
-        log "no squash"
-    elif [[ "$DOCKER_DO_SQUASH" = init ]];then
-        DOCKER_DO_SQUASH="--squash"
-        if ! (printf "FROM alpine\nRUN touch foo\n" | docker build --squash - >/dev/null 2>&1 );then
-            DOCKER_DO_SQUASH=
-            log "docker squash isnt not supported"
-        fi
-    fi
-    echo $DOCKER_DO_SQUASH
-}
+#get_docker_squash_args() {
+#    DOCKER_DO_SQUASH=${DOCKER_DO_SQUASH-init}
+#    if ! ( echo "${NO_SQUASH-}"|grep -E -q "^(no)?$" );then
+#        DOCKER_DO_SQUASH=""
+#        log "no squash"
+#    elif [[ "$DOCKER_DO_SQUASH" = init ]];then
+#        DOCKER_DO_SQUASH="--squash"
+#        if ! (printf "FROM alpine\nRUN touch foo\n" | docker build --squash - >/dev/null 2>&1 );then
+#            DOCKER_DO_SQUASH=
+#            log "docker squash isnt not supported"
+#        fi
+#    fi
+#    echo $DOCKER_DO_SQUASH
+#}
 
 set_global_tag() {
     val=${duplicated_tags[$1]}
@@ -833,21 +859,21 @@ set_global_tag() {
 }
 
 set_global_tags() {
-	set_global_tag "corpusops/pgrouting-bare/9.6"        "corpusops/pgrouting-bare/9"
-    set_global_tag "corpusops/pgrouting-bare:10-2.5-2.6" "corpusops/pgrouting-bare:10"
-    set_global_tag "corpusops/pgrouting-bare:11-2.5-2.6" "corpusops/pgrouting-bare:11"
+	# set_global_tag "corpusops/pgrouting-bare/9.6"        "corpusops/pgrouting-bare/9"
+    # set_global_tag "corpusops/pgrouting-bare:10-2.5-2.6" "corpusops/pgrouting-bare:10"
+    # set_global_tag "corpusops/pgrouting-bare:10-2.4-2.6" "corpusops/pgrouting-bare:10-2.4"
+    # set_global_tag "corpusops/pgrouting-bare:10-2.5-2.6" "corpusops/pgrouting-bare:10-2.5"
+    # set_global_tag "corpusops/pgrouting-bare:11-2.5-2.6" "corpusops/pgrouting-bare:11"
+    # set_global_tag "corpusops/pgrouting-bare:11-2.5-2.6" "corpusops/pgrouting-bare:11-2.5"
+    # set_global_tag "corpusops/pgrouting-bare:11-3-3.1"   "corpusops/pgrouting-bare:11-3"
     set_global_tag "corpusops/pgrouting-bare:12-3-3.1"   "corpusops/pgrouting-bare:12"
     set_global_tag "corpusops/pgrouting-bare:13-3-3.1"   "corpusops/pgrouting-bare:13"
-    set_global_tag "corpusops/pgrouting-bare:10-2.4-2.6" "corpusops/pgrouting-bare:10-2.4"
-    set_global_tag "corpusops/pgrouting-bare:10-2.5-2.6" "corpusops/pgrouting-bare:10-2.5"
-    set_global_tag "corpusops/pgrouting-bare:11-2.5-2.6" "corpusops/pgrouting-bare:11-2.5"
-    set_global_tag "corpusops/pgrouting-bare:11-3-3.1"   "corpusops/pgrouting-bare:11-3"
     set_global_tag "corpusops/pgrouting-bare:12-3-3.1"   "corpusops/pgrouting-bare:12-3"
     set_global_tag "corpusops/pgrouting-bare:13-3-3.4"   "corpusops/pgrouting-bare:13-3"
     set_global_tag "corpusops/pgrouting-bare:14-3-3.4"   "corpusops/pgrouting-bare:14-3"
-    set_global_tag "corpusops/pgrouting-bare:15-3-3.4"   "corpusops/pgrouting-bare:15-3"
-    set_global_tag "corpusops/pgrouting-bare:16-3-3.4"   "corpusops/pgrouting-bare:16-3"
-    set_global_tag "corpusops/pgrouting-bare:16-3-3.4"   "corpusops/pgrouting-bare:latest"
+    set_global_tag "corpusops/pgrouting-bare:15-3-3.6"   "corpusops/pgrouting-bare:15-3"
+    set_global_tag "corpusops/pgrouting-bare:16-3-3.6"   "corpusops/pgrouting-bare:16-3"
+    set_global_tag "corpusops/pgrouting-bare:16-3-3.6"   "corpusops/pgrouting-bare:latest"
     pgrouting9ver="2.5"
     for i in 9.4 9.5 9.6;do
         for j in 2.4 2.5;do
@@ -871,7 +897,7 @@ record_build_image() {
         log "Image $itag is update to date, skipping build"
         return
     fi
-    dargs="${DOCKER_BUILD_ARGS-} $(get_docker_squash_args)"
+    dargs="${DOCKER_BUILD_ARGS-}"
     local dbuild="cat $image/$df|docker build ${dargs-}  -t $itag . -f - --build-arg=DOCKER_IMAGES_COMMIT=$git_commit"
     local retries=${DOCKER_BUILD_RETRIES:-2}
     local cmd="dret=8 && for i in \$(seq $retries);do if ($dbuild);then dret=0;break;else dret=6;fi;done"
