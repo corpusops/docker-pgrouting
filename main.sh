@@ -260,7 +260,7 @@ SKIPPED_TAGS="$SKIP_TF|$SKIP_MINOR_OS|$SKIP_NODE|$SKIP_DOCKER|$SKIP_MINIO|$SKIP_
 CURRENT_TS=$(date +%s)
 IMAGES_SKIP_NS="((mailhog|postgis|pgrouting(-bare)?|^library|dejavu|(minio/(minio|mc))))"
 
-PGROUTING_SKIPPED_TAGS="pgrouting(-bare)?:(((8|9|10|11)($|\.|-|$))|.*(rc|bullseye|buster|bookworm|stretch|jessie|alpine|beta))"
+PGROUTING_SKIPPED_TAGS="pgrouting(-bare)?:(((14-3-3.0|13-3-3.0|8|9|10|11)($|\.|-|$))|.*(rc|bullseye|buster|bookworm|stretch|jessie|alpine|beta))"
 SKIPPED_TAGS="$PGROUTING_SKIPPED_TAGS"
 PROTECTED_VERSIONS=""
 default_images="
