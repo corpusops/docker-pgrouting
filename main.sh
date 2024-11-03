@@ -290,8 +290,7 @@ corpusops/pgrouting-bare/15-3-3.4\
 corpusops/pgrouting-bare/12-2.5-2.6\
  corpusops/pgrouting-bare/12-3-3.0\
  corpusops/pgrouting-bare/12-3-3.1::30
-corpusops/pgrouting-bare/11-2.5-2.5\
- corpusops/pgrouting-bare/11-2.5-2.6\
+corpusops/pgrouting-bare/11-2.5-2.6\
  corpusops/pgrouting-bare/11-3-3.0\
  corpusops/pgrouting-bare/11-3-3.1::30
 corpusops/pgrouting-bare/10-2.4-2.4\
@@ -347,7 +346,6 @@ PGROUTING_MINOR_TAGS="
 10-2.4-2.6
 10-2.5-2.4
 10-2.5-2.5
-11-2.5-2.5
 12-2.5-2.6
 12-2.5-2.6
 12-2.5-2.6
@@ -748,6 +746,7 @@ do_refresh_pgrouting() {
     rm -rf corpusops/pgrouting-bare/9.4-2.4-2.5
     rm -rf corpusops/pgrouting-bare/9.4-2.4-2.6
     rm -rf corpusops/pgrouting-bare/9.4-2.5-2.5
+    rm -rf corpusops/pgrouting-bare/11*2.5*2.5
 }
 
 #  refresh_images $args: refresh images files
@@ -831,7 +830,6 @@ set_global_tags() {
     set_global_tag "corpusops/pgrouting-bare:10-2.5-2.6" "corpusops/pgrouting-bare:10-2.5"
     set_global_tag "corpusops/pgrouting-bare:11-2.5-2.6" "corpusops/pgrouting-bare:11-2.5"
     set_global_tag "corpusops/pgrouting-bare:11-3-3.1"   "corpusops/pgrouting-bare:11-3"
-    set_global_tag "corpusops/pgrouting-bare:12-2.5-2.6" "corpusops/pgrouting-bare:11-2.5"
     set_global_tag "corpusops/pgrouting-bare:12-3-3.1"   "corpusops/pgrouting-bare:12-3"
     set_global_tag "corpusops/pgrouting-bare:13-3-3.4"   "corpusops/pgrouting-bare:13-3"
     set_global_tag "corpusops/pgrouting-bare:14-3-3.4"   "corpusops/pgrouting-bare:14-3"
