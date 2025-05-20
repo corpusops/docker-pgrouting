@@ -1,5 +1,5 @@
 FROM corpusops/postgis-bare:%%PG_MAJOR%%-%%POSTGIS_MAJOR%% AS builder
-MAINTAINER kiorky <kiorky@cryptelium.net>
+MAINTAINER kiorky <freesoftware@makina-corpus.com>
 RUN bash -euxc ': \
     && apt-get update -qq \
     && apt-get install -y --force-yes build-essential python-twisted-web || true \
@@ -91,7 +91,7 @@ RUN mk-build-deps -t "apt-get --no-install-recommends -y --force-yes -o Debug::p
 RUN debuild -i -us -uc -b
 
 FROM corpusops/postgis-bare:%%PG_MAJOR%%-%%POSTGIS_MAJOR%% AS final
-MAINTAINER kiorky <kiorky@cryptelium.net>
+MAINTAINER kiorky <freesoftware@makina-corpus.com>
 ENV PGROUTING_MAJOR %%PGROUTING_MAJOR%%
 ENV PGROUTING_VERSION %%PGROUTING_VERSION%%
 COPY --from=builder /usr/src/*deb /tmp/

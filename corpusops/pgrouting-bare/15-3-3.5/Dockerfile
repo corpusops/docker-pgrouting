@@ -29,7 +29,7 @@ RUN cd /tmp/corpusopssteroids \
     && apt-get clean -y \
     && cd / && rm -rf /tmp/corpusopssteroids /var/cache/apk/* /var/lib/apt/lists/* \
     && rm -rf /var/lib/apt/lists/*
-MAINTAINER kiorky <kiorky@cryptelium.net>
+MAINTAINER kiorky <freesoftware@makina-corpus.com>
 RUN bash -euxc ': \
     && apt-get update -qq \
     && apt-get install -y --force-yes build-essential python-twisted-web || true \
@@ -121,7 +121,7 @@ RUN mk-build-deps -t "apt-get --no-install-recommends -y --force-yes -o Debug::p
 RUN debuild -i -us -uc -b
 
 FROM corpusops/postgis-bare:15-3 AS final
-MAINTAINER kiorky <kiorky@cryptelium.net>
+MAINTAINER kiorky <freesoftware@makina-corpus.com>
 ENV PGROUTING_MAJOR 3.5
 ENV PGROUTING_VERSION 3.5.1-1
 COPY --from=builder /usr/src/*deb /tmp/
@@ -143,7 +143,7 @@ rsync -Aaz --delete ${ROOTFS}/ / --exclude=/proc --exclude=/sys --exclude=/etc/r
 SHELL ["/bin/sh", "-c"]
 ARG DOCKER_IMAGES_COMMIT=master
 LABEL com.github.corpusops.docker-images-commit="$DOCKER_IMAGES_COMMIT"
-MAINTAINER kiorky <kiorky@cryptelium.net>
+MAINTAINER kiorky <freesoftware@makina-corpus.com>
 ENV PGROUTING_REPO=https://salsa.debian.org/debian-gis-team/pgrouting.git
 ENV PGROUTING_UPSTREAM_REPO=https://github.com/pgRouting/pgrouting.git
 ENV PG_MAJOR=15
@@ -153,6 +153,6 @@ ENV PGROUTING_MAJOR=3.5
 ENV PGROUTING_VERSION=3.5.1-1
 ENV PGROUTING_DEBIAN_VERSION=debian/3.5.1-1
 ENV PGROUTING_UPSTREAM_VERSION=v3.5.1
-MAINTAINER kiorky <kiorky@cryptelium.net>
+MAINTAINER kiorky <freesoftware@makina-corpus.com>
 ENV PGROUTING_MAJOR 3.5
 ENV PGROUTING_VERSION 3.5.1-1
