@@ -1,6 +1,6 @@
-ARG ANCESTOR=corpusops/postgis-bare:16-3
+ARG ANCESTOR=corpusops/postgis-bare:17-3
 ARG RSYNC=corpusops/rsync
-FROM corpusops/postgis-bare:16-3 AS builder
+FROM corpusops/postgis-bare:17-3 AS builder
 ARG NONINTERACTIVE=y DEBIAN_FRONTEND=noninteractive
 ADD \
     helpers/up.sh \
@@ -69,8 +69,8 @@ RUN bash -euxc ': \
     && git remote add pgrouting $PGROUTING_UPSTREAM_REPO \
     && git fetch pgrouting \
     '
-ENV PG_MAJOR=16
-ENV POSTGRES_MAJOR=16
+ENV PG_MAJOR=17
+ENV POSTGRES_MAJOR=17
 ENV POSTGIS_MAJOR=3
 ENV PGROUTING_MAJOR=3.6
 ENV PGROUTING_VERSION=3.6.3-1
@@ -120,7 +120,7 @@ RUN bash -euxc ': \
 RUN mk-build-deps -t "apt-get --no-install-recommends -y --force-yes -o Debug::pkgProblemResolver=yes" -ir debian/control
 RUN debuild -i -us -uc -b
 
-FROM corpusops/postgis-bare:16-3 AS final
+FROM corpusops/postgis-bare:17-3 AS final
 MAINTAINER kiorky <kiorky@cryptelium.net>
 ENV PGROUTING_MAJOR 3.6
 ENV PGROUTING_VERSION 3.6.3-1
@@ -146,8 +146,8 @@ LABEL com.github.corpusops.docker-images-commit="$DOCKER_IMAGES_COMMIT"
 MAINTAINER kiorky <kiorky@cryptelium.net>
 ENV PGROUTING_REPO=https://salsa.debian.org/debian-gis-team/pgrouting.git
 ENV PGROUTING_UPSTREAM_REPO=https://github.com/pgRouting/pgrouting.git
-ENV PG_MAJOR=16
-ENV POSTGRES_MAJOR=16
+ENV PG_MAJOR=17
+ENV POSTGRES_MAJOR=17
 ENV POSTGIS_MAJOR=3
 ENV PGROUTING_MAJOR=3.6
 ENV PGROUTING_VERSION=3.6.3-1

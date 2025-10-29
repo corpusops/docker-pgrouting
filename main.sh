@@ -266,7 +266,8 @@ PROTECTED_VERSIONS=""
 default_images="
 corpusops/pgrouting-bare
 "
-ONLY_ONE_MINOR="postgres|elasticsearch|nginx"
+
+ONLY_ONE_MINOR="postgres|nginx|opensearch|elasticsearch"
 PROTECTED_TAGS="corpusops/rsyslog"
 find_top_node_() {
     img=library/node
@@ -297,6 +298,9 @@ corpusops/pgrouting-bare/10-2.5-2.4\
  corpusops/pgrouting-bare/11-2.5-2.6::30
 "
 BATCHED_IMAGES="\
+corpusops/pgrouting-bare/17-3-3.6\
+ corpusops/pgrouting-bare/17-3-3.5\
+ corpusops/pgrouting-bare/17-3-3.4::30
 corpusops/pgrouting-bare/16-3-3.6\
  corpusops/pgrouting-bare/16-3-3.5\
  corpusops/pgrouting-bare/16-3-3.4::30
@@ -327,6 +331,7 @@ POSTGIS_MINOR_TAGS="
 14-3
 15-3
 16-3
+17-3
 "
 UNSUPPORTED_PGROUTING_MINOR_TAGS="
 10-2.5-2.6
@@ -351,11 +356,14 @@ UNSUPPORTED_PGROUTING_MINOR_TAGS="
 11-2.5-2.6
 "
 PGROUTING_MINOR_TAGS="
+17-3-3.6
+17-3-3.5
+17-3-3.4
 16-3-3.6
-15-3-3.6
 16-3-3.5
-15-3-3.5
 16-3-3.4
+15-3-3.6
+15-3-3.5
 15-3-3.4
 14-3-3.4
 13-3-3.4
@@ -368,15 +376,18 @@ PGROUTING_MINOR_TAGS="
 12-2.5-2.6
 "
 UNSUPPORTED_POSTGRES_MAJOR="9 10 11"
-POSTGRES_MAJOR="12 13 14 15 16"
+POSTGRES_MAJOR="12 13 14 15 16 17"
 packagesUrlJessie='http://apt-archive.postgresql.org/pub/repos/apt/dists/jessie-pgdg/main/binary-amd64/Packages'
 packagesJessie="local/$(echo "$packagesUrlJessie" | sed -r 's/[^a-zA-Z.-]+/-/g')"
 packagesUrlStretch='http://apt-archive.postgresql.org/pub/repos/apt/dists/stretch-pgdg/main/binary-amd64/Packages'
 packagesStretch="local/$(echo "$packagesUrlStretch" | sed -r 's/[^a-zA-Z.-]+/-/g')"
-packagesUrlBuster='http://apt.postgresql.org/pub/repos/apt/dists/buster-pgdg/main/binary-amd64/Packages'
+packagesUrlBuster='http://apt-archive.postgresql.org/pub/repos/apt/dists/buster-pgdg/main/binary-amd64/Packages'
 packagesBuster="local/$(echo "$packagesUrlBuster" | sed -r 's/[^a-zA-Z.-]+/-/g')"
 packagesUrlBullseye='http://apt.postgresql.org/pub/repos/apt/dists/bullseye-pgdg/main/binary-amd64/Packages'
 packagesBullseye="local/$(echo "$packagesUrlBullseye" | sed -r 's/[^a-zA-Z.-]+/-/g')"
+packagesUrlBookworm='http://apt.postgresql.org/pub/repos/apt/dists/bookworm-pgdg/main/binary-amd64/Packages'
+packagesBookworm="local/$(echo "$packagesUrlBookworm" | sed -r 's/[^a-zA-Z.-]+/-/g')"
+
 
 PGROUTING_REPO="${PGROUTING_REPO:-"https://salsa.debian.org/debian-gis-team/pgrouting.git"}"
 PGROUTING_UPSTREAM_REPO="${PGROUTING_UPSTREAM_REPO:-"https://github.com/pgRouting/pgrouting.git"}"
@@ -588,7 +599,7 @@ is_skipped() {
 }
 
 skip_local() {
-    grep -E -v "(.\/)?local|\.git|docker-pgrouting|docker-postgis"
+    grep -E -v "(.\/)?local|\.git|docker-postgis|docker-pgrouting"
 }
 
 #  get_namespace_tag libary/foo/bar : get image tag with its final namespace
@@ -881,7 +892,8 @@ set_global_tags() {
     set_global_tag "corpusops/pgrouting-bare:14-3-3.4"   "corpusops/pgrouting-bare:14-3"
     set_global_tag "corpusops/pgrouting-bare:15-3-3.6"   "corpusops/pgrouting-bare:15-3"
     set_global_tag "corpusops/pgrouting-bare:16-3-3.6"   "corpusops/pgrouting-bare:16-3"
-    set_global_tag "corpusops/pgrouting-bare:16-3-3.6"   "corpusops/pgrouting-bare:latest"
+    set_global_tag "corpusops/pgrouting-bare:17-3-3.6"   "corpusops/pgrouting-bare:17-3"
+    set_global_tag "corpusops/pgrouting-bare:17-3-3.6"   "corpusops/pgrouting-bare:latest"
     pgrouting9ver="2.5"
     for i in 9.4 9.5 9.6;do
         for j in 2.4 2.5;do
